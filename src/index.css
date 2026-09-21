@@ -1,0 +1,340 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    /* SnapFind AI Brand Color Tokens */
+    --sf-bg: #07090d;
+    --sf-surface: #0d1117;
+    --sf-surface-elevated: #121821;
+    --sf-surface-hover: #182230;
+    --sf-border: rgba(255, 255, 255, 0.08);
+    --sf-border-hover: rgba(204, 255, 0, 0.35);
+
+    --sf-primary: #ccff00;
+    --sf-primary-hover: #d9ff33;
+    --sf-ai: #00ff66;
+    --sf-ai-hover: #33ff85;
+    --sf-attention: #ff6600;
+    --sf-highlight: #ffff00;
+    --sf-danger: #ff0000;
+
+    --sf-text: #f8fafc;
+    --sf-text-secondary: #94a3b8;
+    --sf-text-muted: #64748b;
+    --sf-text-disabled: #475569;
+
+    /* Interface Accent Tone Variables (5 Swatches: Blue, Indigo, Purple, Emerald, Amber) */
+    --accent-primary: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-soft: rgba(59, 130, 246, 0.12);
+    --accent-border: rgba(59, 130, 246, 0.35);
+    --accent-glow: rgba(59, 130, 246, 0.25);
+    --accent-text: #60a5fa;
+    --accent-ring: rgba(59, 130, 246, 0.45);
+    --accent-badge-bg: rgba(59, 130, 246, 0.15);
+    --accent-badge-text: #93c5fd;
+
+    /* Legacy compatibility mappings */
+    --bg-obsidian: #07090d;
+    --bg-secondary: #0d1117;
+    --bg-elevated: #121821;
+    --bg-hover: #182230;
+    --border-subtle: rgba(255, 255, 255, 0.08);
+
+    --color-electric-blue: #ccff00;
+    --color-neon-violet: #00ff66;
+    --color-attention-orange: #ff6600;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-disabled: #475569;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Desktop viewport constraint: prevent body from scrolling, allowing only main content container to scroll */
+  @media (min-width: 1024px) {
+    html,
+    body {
+      overflow: hidden;
+    }
+  }
+
+  body {
+    background-color: #07090d;
+    color: #f8fafc;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+/* Custom Utilities for SnapFind AI Design System */
+@layer utilities {
+  /* Surfaces */
+  .bg-obsidian {
+    background-color: #07090d;
+  }
+  .bg-surface-secondary {
+    background-color: #0d1117;
+  }
+  .bg-surface-elevated {
+    background-color: #121821;
+  }
+  .bg-surface-hover {
+    background-color: #182230;
+  }
+
+  /* Borders */
+  .border-subtle {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  /* Glass Panels */
+  .glass-panel {
+    background: rgba(13, 17, 23, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-card {
+    background: rgba(18, 24, 33, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glass-card-hover {
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass-card-hover:hover {
+    background-color: #182230;
+    border-color: rgba(204, 255, 0, 0.35);
+    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.7), 0 0 20px -4px rgba(204, 255, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  /* AI Gradients */
+  .bg-ai-gradient {
+    background: linear-gradient(135deg, #ccff00 0%, #00ff66 100%);
+  }
+
+  .text-ai-gradient {
+    background: linear-gradient(135deg, #ccff00 0%, #00ff66 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-speed-gradient {
+    background: linear-gradient(90deg, #ff6600 0%, #ccff00 50%, #00ff66 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Button System */
+  .btn-primary {
+    background-color: #ccff00;
+    color: #07090d;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px -2px rgba(204, 255, 0, 0.3);
+  }
+
+  .btn-primary:hover {
+    background-color: #d9ff33;
+    box-shadow: 0 6px 20px -2px rgba(204, 255, 0, 0.45), 0 0 15px 0 rgba(204, 255, 0, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  .btn-secondary {
+    background-color: #121821;
+    color: #f8fafc;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-secondary:hover {
+    background-color: #182230;
+    border-color: rgba(204, 255, 0, 0.25);
+    color: #ccff00;
+  }
+
+  .btn-ai-premium {
+    background: linear-gradient(135deg, #ccff00 0%, #00ff66 100%);
+    color: #07090d;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 18px -2px rgba(0, 255, 102, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .btn-ai-premium:hover {
+    opacity: 0.95;
+    box-shadow: 0 8px 24px -2px rgba(0, 255, 102, 0.45), 0 0 20px 0 rgba(204, 255, 0, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .btn-ai-premium:active {
+    transform: scale(0.98);
+  }
+
+  .btn-attention {
+    background-color: #ff6600;
+    color: #ffffff;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px -2px rgba(255, 102, 0, 0.35);
+  }
+
+  .btn-attention:hover {
+    background-color: #ff7a1a;
+    box-shadow: 0 6px 20px -2px rgba(255, 102, 0, 0.5), 0 0 15px 0 rgba(255, 102, 0, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .btn-attention:active {
+    transform: scale(0.98);
+  }
+
+  .btn-danger {
+    background-color: #ff0000;
+    color: #ffffff;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px -2px rgba(255, 0, 0, 0.35);
+  }
+
+  .btn-danger:hover {
+    background-color: #e60000;
+    box-shadow: 0 6px 20px -2px rgba(255, 0, 0, 0.5);
+    transform: translateY(-1px);
+  }
+
+  /* Search Glow */
+  .search-glow-focused {
+    border-color: #ccff00;
+    box-shadow: 0 0 25px -4px rgba(204, 255, 0, 0.2), 0 0 45px -8px rgba(0, 255, 102, 0.12);
+  }
+}
+
+/* Subtle Shimmer & AI Scanning */
+@keyframes shimmerEffect {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes aiThinkingPulse {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(0.99);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.01);
+  }
+}
+
+@keyframes aiScanLaser {
+  0% {
+    top: 0%;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    top: 100%;
+    opacity: 0.2;
+  }
+}
+
+.shimmer-loading {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(204, 255, 0, 0.06) 50%, rgba(255, 255, 255, 0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmerEffect 2s infinite;
+}
+
+.ai-thinking-glow {
+  animation: aiThinkingPulse 2.4s ease-in-out infinite;
+}
+
+.ai-scan-laser {
+  animation: aiScanLaser 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07090d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(204, 255, 0, 0.45);
+}
+
+/* Custom Hide Scrollbar Utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Dynamic Accent Theme Utility Classes */
+.bg-accent-primary {
+  background-color: var(--accent-primary);
+}
+.bg-accent-hover:hover {
+  background-color: var(--accent-hover);
+}
+.bg-accent-soft {
+  background-color: var(--accent-soft);
+}
+.text-accent-primary {
+  color: var(--accent-primary);
+}
+.text-accent-muted {
+  color: var(--accent-text);
+}
+.border-accent {
+  border-color: var(--accent-border);
+}
+.ring-accent {
+  --tw-ring-color: var(--accent-ring);
+}
+.glow-accent {
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+

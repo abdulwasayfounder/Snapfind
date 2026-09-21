@@ -1,0 +1,6 @@
+{
+  "name": "SnapFind",
+  "description": "Screenshot indexer and natural language search engine using Gemini Vision OCR.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
