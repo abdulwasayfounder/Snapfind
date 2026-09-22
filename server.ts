@@ -226,7 +226,10 @@ CRITICAL INSTRUCTIONS:
 9. tags: 4 to 8 relevant search tags or categorization keywords (lowercase, e.g. ["finance", "receipt", "saas", "billing"]).
 10. objects: Array of detected visual, UI, or physical objects in the image (e.g. ["table", "logo", "button", "credit card icon", "navigation bar"]). If none, return [].
 11. textDensity: "low", "medium", or "high".
-12. keyMetrics: List of important numbers/amounts with labels if applicable.`;
+12. keyMetrics: List of important numbers/amounts with labels if applicable.
+13. smart_category: Categorize as exactly one of: ["Banking", "Transactions", "Payments", "Money Transfers", "Receipts", "Orders", "Invoices", "IDs/Documents", "Personal", "Private Messages", "Travel", "Shopping", "Work", "Other"].
+14. privacy_level: "normal", "private", or "highly_sensitive". Passports, CNIC, SSN, payment cards, credentials/passwords, OTPs are "highly_sensitive". Bank transactions, personal documents, private chat logs are "private".
+15. sensitive_categories: Array of strings describing detected sensitive types, e.g. ["bank_transaction", "financial_information", "government_id", "passwords_credentials", "private_messages"]. If none, return [].`;
 
     let response: any = null;
     let attempts = 0;
@@ -249,6 +252,9 @@ CRITICAL INSTRUCTIONS:
         objects: ["interface", "window", "text block"],
         textDensity: "low",
         keyMetrics: [],
+        smart_category: "Other",
+        privacy_level: "normal",
+        sensitive_categories: [],
       };
     } else {
       while (attempts < maxAttempts) {
@@ -298,6 +304,12 @@ CRITICAL INSTRUCTIONS:
                   },
                   textDensity: { type: Type.STRING },
                   keyMetrics: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                  },
+                  smart_category: { type: Type.STRING },
+                  privacy_level: { type: Type.STRING },
+                  sensitive_categories: {
                     type: Type.ARRAY,
                     items: { type: Type.STRING },
                   },
@@ -405,6 +417,9 @@ CRITICAL INSTRUCTIONS:
         keyEntities: Array.isArray(analysis.keyEntities) ? analysis.keyEntities : [],
         tags: Array.isArray(analysis.tags) ? analysis.tags.map((t: string) => String(t).toLowerCase().replace(/^#/, '')) : [],
         objects: Array.isArray(analysis.objects) ? analysis.objects : [],
+        smart_category: analysis.smart_category || "Other",
+        privacy_level: analysis.privacy_level || "normal",
+        sensitive_categories: Array.isArray(analysis.sensitive_categories) ? analysis.sensitive_categories : [],
         indexedAt: new Date().toISOString(),
         timestamp: timestamp || new Date().toISOString(),
       },

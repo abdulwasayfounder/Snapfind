@@ -20,6 +20,22 @@ export type CategoryType =
   | "Website"
   | "Other";
 
+export type SmartCategoryType =
+  | "Banking"
+  | "Transactions"
+  | "Payments"
+  | "Money Transfers"
+  | "Receipts"
+  | "Orders"
+  | "Invoices"
+  | "IDs/Documents"
+  | "Personal"
+  | "Private Messages"
+  | "Travel"
+  | "Shopping"
+  | "Work"
+  | "Other";
+
 export type ProcessingJobStatus =
   | "Queued"
   | "Preparing"
@@ -168,6 +184,12 @@ export interface ScreenshotItem {
   sensitiveReason?: string;
   is_locked?: boolean;
   isLocked?: boolean;
+  smart_category?: SmartCategoryType;
+  smartCategory?: SmartCategoryType;
+  in_vault?: boolean;
+  inVault?: boolean;
+  is_blurred?: boolean;
+  isBlurred?: boolean;
   reminder_date?: string;
   reminderDate?: string;
   reminder_text?: string;
@@ -184,6 +206,9 @@ export interface CollectionItem {
   itemCount?: number;
   color?: string;
   icon?: string;
+  isLocked?: boolean;
+  hasLock?: boolean;
+  lockType?: "none" | "pattern" | "pin" | "password";
 }
 
 export interface ProcessingJob {

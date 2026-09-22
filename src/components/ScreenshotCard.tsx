@@ -38,6 +38,7 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
 }) => {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgSrc, setImgSrc] = useState(item.thumbnailUri || item.imageUrl || FALLBACK_IMAGE_PLACEHOLDER);
+  const [isRevealed, setIsRevealed] = useState(false);
 
   const isSensitive = Boolean(
     item.is_sensitive ||
@@ -94,17 +95,32 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
           alt={item.title}
           onLoad={() => setImgLoaded(true)}
           onError={handleImageError}
-          className={`w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105 ${
+          className={`w-full h-full object-cover object-top transition-all duration-300 group-hover:scale-105 ${
             imgLoaded ? "opacity-90 group-hover:opacity-100" : "opacity-0"
-          }`}
+          } ${isSensitive && !isRevealed ? "filter blur-md scale-105 brightness-75" : ""}`}
           loading="lazy"
         />
 
-        {/* Security & Privacy Badge */}
+        {/* Security & Privacy Badge with tap-to-unblur */}
         {isSensitive && (
-          <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-rose-500/80 backdrop-blur-md border border-rose-400/30 text-white text-[10px] font-bold flex items-center gap-1 shadow-md">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsRevealed((r) => !r);
+            }}
+            className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-rose-500/85 hover:bg-rose-600 backdrop-blur-md border border-rose-400/30 text-white text-[10px] font-bold flex items-center gap-1 shadow-md transition-colors cursor-pointer"
+            title={isRevealed ? "Tap to blur" : "Tap to reveal screenshot"}
+          >
             <Lock className="w-2.5 h-2.5" />
-            <span>Private</span>
+            <span>{isRevealed ? "Revealed" : "Private Blur"}</span>
+          </button>
+        )}
+
+        {/* Smart Category Indicator (if not sensitive) */}
+        {!isSensitive && (item.smart_category || item.smartCategory) && (item.smart_category || item.smartCategory) !== "Other" && (
+          <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-md border border-emerald-500/30 text-[#00FF66] text-[10px] font-bold flex items-center gap-1 shadow-md">
+            <span>{item.smart_category || item.smartCategory}</span>
           </div>
         )}
 

@@ -20,6 +20,7 @@ import { checkDuplicateScreenshot, handleDuplicateIndexing, checkExactDuplicateB
 import { SubscriptionManager } from "./billing/SubscriptionManager";
 import { optimizeImageForPipeline } from "../utils/imageOptimizer";
 import { detectScreenshotPrivacy } from "./privacyDetector";
+import { classifySmartSnaps } from "./smartSnapsClassifier";
 import { decodeQrFromImage, extractWebsitesFromText } from "../utils/qrDetector";
 
 const QUEUE_STORAGE_KEY = "snapfind_processing_queue_v1";
@@ -440,6 +441,9 @@ class ProcessingQueueService {
     let aiKeywords: string[] = [];
     let aiKeyEntities: string[] = [];
     let aiObjects: string[] = [];
+    let rawAiSmartCategory: any = undefined;
+    let rawAiPrivacyLevel: any = undefined;
+    let rawAiSensitiveCategories: string[] = [];
     let aiSucceeded = false;
 
     // Single consolidated high-speed AI call: extracts OCR + all metadata simultaneously
@@ -458,6 +462,10 @@ class ProcessingQueueService {
           aiKeywords = Array.isArray(analysis.keywords) ? analysis.keywords : [];
           aiKeyEntities = Array.isArray(analysis.keyEntities) ? analysis.keyEntities : [];
           aiObjects = Array.isArray(analysis.objects) ? analysis.objects : [];
+          const anyAnalysis = analysis as any;
+          rawAiSmartCategory = anyAnalysis.smart_category || anyAnalysis.smartCategory;
+          rawAiPrivacyLevel = anyAnalysis.privacy_level || anyAnalysis.privacyLevel;
+          rawAiSensitiveCategories = Array.isArray(anyAnalysis.sensitive_categories) ? anyAnalysis.sensitive_categories : [];
           aiSucceeded = true;
         }
       } catch (aiErr) {
@@ -558,6 +566,59 @@ class ProcessingQueueService {
     job.processingTimestamp = nowIso;
 
     const privacyResult = detectScreenshotPrivacy(ocrText, primaryTitle, aiCategory, aiTags);
+    const smartClassification = classifySmartSnaps(
+      ocrText,
+      primaryTitle,
+      aiCategory,
+      aiTags,
+      aiKeyEntities,
+      aiKeywords
+    );
+
+    // Prioritize AI smart_category if specific, otherwise strict OCR/visual classifier
+    const finalSmartCategory =
+      rawAiSmartCategory && rawAiSmartCategory !== "Other"
+        ? rawAiSmartCategory
+        : smartClassification.smartCategory;
+
+    let finalPrivacyLevel = smartClassification.privacyLevel;
+    if (rawAiPrivacyLevel === "highly_sensitive") {
+      finalPrivacyLevel = "highly_sensitive";
+    } else if (rawAiPrivacyLevel === "private" && finalPrivacyLevel === "normal") {
+      finalPrivacyLevel = "private";
+    }
+
+    const finalSensitiveCategories = Array.from(
+      new Set([
+        ...smartClassification.sensitiveCategories,
+        ...privacyResult.sensitiveCategories,
+        ...rawAiSensitiveCategories,
+      ])
+    );
+
+    const finalPrivacyReasons = Array.from(
+      new Set([
+        ...smartClassification.privacyReasons,
+        ...privacyResult.privacyReasons,
+      ])
+    );
+
+    const isFinalSensitive = finalPrivacyLevel === "private" || finalPrivacyLevel === "highly_sensitive";
+
+    // Auto smart collection routing:
+    // Route financial to "💳 Banking & Payments"
+    if (
+      smartClassification.isFinance ||
+      ["Banking", "Transactions", "Payments", "Money Transfers"].includes(finalSmartCategory)
+    ) {
+      if (!aiCollectionName || aiCollectionName === "Ideas & Notes" || aiCollectionName === "Financial Documents") {
+        aiCollectionName = "💳 Banking & Payments";
+      }
+    } else if (isFinalSensitive) {
+      if (!aiCollectionName || aiCollectionName === "Ideas & Notes") {
+        aiCollectionName = "🔒 Private & Sensitive";
+      }
+    }
 
     const updatedItem: ScreenshotItem = normalizeScreenshotItem({
       id: job.imageId,
@@ -599,16 +660,20 @@ class ProcessingQueueService {
       sha256_hash: imgHash,
       hash: imgHash,
       fileHash: imgHash,
-      privacy_level: privacyResult.privacyLevel,
-      privacyLevel: privacyResult.privacyLevel,
-      sensitive_categories: privacyResult.sensitiveCategories,
-      sensitiveCategories: privacyResult.sensitiveCategories,
-      is_sensitive: privacyResult.isSensitive,
-      isSensitive: privacyResult.isSensitive,
+      smart_category: finalSmartCategory,
+      smartCategory: finalSmartCategory,
+      privacy_level: finalPrivacyLevel,
+      privacyLevel: finalPrivacyLevel,
+      sensitive_categories: finalSensitiveCategories,
+      sensitiveCategories: finalSensitiveCategories,
+      is_sensitive: isFinalSensitive,
+      isSensitive: isFinalSensitive,
       masked_ocr_text: privacyResult.maskedOcrText,
       maskedOcrText: privacyResult.maskedOcrText,
-      privacy_reasons: privacyResult.privacyReasons,
-      privacyReasons: privacyResult.privacyReasons,
+      privacy_reasons: finalPrivacyReasons,
+      privacyReasons: finalPrivacyReasons,
+      is_blurred: isFinalSensitive,
+      isBlurred: isFinalSensitive,
       // URL, Website and QR Code detection
       website_name: websiteInfo.websiteName,
       websiteName: websiteInfo.websiteName,

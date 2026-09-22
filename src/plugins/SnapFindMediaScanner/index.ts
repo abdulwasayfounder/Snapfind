@@ -16,6 +16,7 @@ export interface ScanProgressPayload {
 
 export interface ScanCompletedPayload {
   totalFound: number;
+  lastScanTimestamp?: number;
   screenshots: Array<{
     uri: string;
     filename: string;

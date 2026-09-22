@@ -63,6 +63,7 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useOnlineStatus } from "./hooks/useOnlineStatus";
 import { useRouteScrollReset } from "./hooks/useRouteScrollReset";
 import { OfflineBanner } from "./components/OfflineBanner";
+import { GalleryPermissionModal } from "./components/GalleryPermissionModal";
 import { PricingPageView } from "./components/PricingPageView";
 import { NotificationPageView } from "./components/NotificationPageView";
 import { AccountPageView } from "./components/AccountPageView";
@@ -255,8 +256,10 @@ function AppContent() {
     const handleQuotaExceeded = (e: any) => {
       NotificationService.notifyQuotaExceeded(activeScreenshots.length, 500);
       addToast({
-        title: e.detail?.title || "Plan Quota Reached",
-        description: e.detail?.message || "You've reached the Free plan limit of 500 screenshots. Upgrade to Pro for 10,000.",
+        title: e.detail?.title || "Your indexing limit has been reached.",
+        description:
+          e.detail?.message ||
+          "Your indexing limit has been reached. Upgrade to Pro Monthly, Pro Annual, or claim a permanent Founder Lifetime seat.",
         type: "info",
       });
       setActiveView("pricing");
@@ -1156,6 +1159,8 @@ function AppContent() {
                   onOpenAuth={() => setIsAuthOpen(true)}
                   isDark={isDark}
                 >
+                  <GalleryPermissionModal onManualUploadClick={() => setActiveView("import")} />
+
                   <DashboardView
                     screenshots={activeScreenshots}
                     collections={collections}
@@ -1309,6 +1314,8 @@ function AppContent() {
                   onOpenAuth={() => setIsAuthOpen(true)}
                   isDark={isDark}
                 >
+                  <GalleryPermissionModal onManualUploadClick={() => setActiveView("import")} />
+
                   <SearchBar
                     query={searchQuery}
                     setQuery={setSearchQuery}

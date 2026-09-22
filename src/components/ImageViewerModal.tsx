@@ -117,6 +117,7 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
 
   useEffect(() => {
     setZoomLevel(1);
+    setRevealSensitive(false);
   }, [item?.id]);
 
   const handleNext = useCallback(() => {
@@ -269,6 +270,21 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
               <Star className={`w-4 h-4 ${item.isFavorite ? "fill-current" : ""}`} />
             </button>
 
+            {/* Blur/Unblur Eye Toggle if Sensitive */}
+            {isSensitive && (
+              <button
+                onClick={() => setRevealSensitive((r) => !r)}
+                className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+                  revealSensitive
+                    ? "bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30"
+                    : "bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30"
+                }`}
+                title={revealSensitive ? "Hide sensitive content" : "Unblur private screenshot"}
+              >
+                {revealSensitive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            )}
+
             {/* Share */}
             <button
               onClick={handleShare}
@@ -359,14 +375,41 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
             )}
 
             {/* Image display */}
-            <div className="w-full h-full flex items-center justify-center p-4">
+            <div className="w-full h-full flex items-center justify-center p-4 relative">
               <motion.img
                 animate={{ scale: zoomLevel }}
                 transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 src={item.imageUrl}
                 alt={item.title}
-                className="max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-lg select-none"
+                className={`max-h-[75vh] w-auto max-w-full object-contain rounded-xl shadow-lg select-none transition-all duration-300 ${
+                  isSensitive && !revealSensitive ? "filter blur-2xl brightness-75 contrast-75" : ""
+                }`}
               />
+
+              {/* Private Blur Notice & Quick Unblur Button */}
+              {isSensitive && !revealSensitive && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 p-6 pointer-events-none">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-black/85 backdrop-blur-xl border border-rose-500/30 max-w-xs text-center space-y-3 shadow-2xl pointer-events-auto">
+                    <div className="w-10 h-10 mx-auto rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 border border-rose-500/30">
+                      <Lock className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Private Content Blurred</h4>
+                      <p className="text-[11px] text-slate-300 mt-1">
+                        Sensitive text & numbers masked to protect against shoulder surfing.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRevealSensitive(true)}
+                      className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-white/20 shadow-md"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-rose-400" />
+                      <span>Tap to Reveal Image</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -508,6 +551,12 @@ export const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
                   <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/25">
                     {item.category}
                   </span>
+                  {(item.smart_category || item.smartCategory) && (
+                    <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-[#00FF66]/15 text-[#00FF66] border border-[#00FF66]/30 flex items-center gap-1.5 shadow-sm">
+                      <Sparkles className="w-3 h-3 text-[#00FF66]" />
+                      <span>{item.smart_category || item.smartCategory}</span>
+                    </span>
+                  )}
                   <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/25 flex items-center gap-1.5">
                     <Layers className="w-3 h-3 text-purple-400" />
                     {item.collectionName || item.collection || "General Vault"}

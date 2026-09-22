@@ -1,10 +1,27 @@
 import { CollectionItem, ScreenshotItem } from "../types";
 import { getDefaultCollectionForCategory } from "./storage";
+import { collectionSecurity, VAULT_COLLECTION_NAME } from "./collectionSecurity";
+import { isFinanceOrPaymentScreenshot, isSensitiveScreenshot } from "./smartSnapsClassifier";
 
 const COLLECTIONS_STORAGE_KEY = "snapfind_collections_v1";
 
 // Default preset icons / color accents for standard AI collections
 const COLLECTION_PRESETS: Record<string, { icon: string; color: string; description: string }> = {
+  "💳 Banking & Payments": {
+    icon: "CreditCard",
+    color: "from-[#00FF66] to-emerald-700",
+    description: "Bank transactions, payment confirmations, transfers, and account statements",
+  },
+  "🔒 Private & Sensitive": {
+    icon: "ShieldAlert",
+    color: "from-amber-500 to-rose-700",
+    description: "Identity documents, credentials, private messages, and confidential records",
+  },
+  "🔐 Vault": {
+    icon: "Lock",
+    color: "from-zinc-700 to-black",
+    description: "Encrypted secure vault for strictly protected personal captures",
+  },
   "Travel & Identity": {
     icon: "Plane",
     color: "from-blue-500 to-indigo-600",
@@ -128,9 +145,85 @@ export function deriveAndSyncCollections(
         icon: preset.icon,
       });
     }
+
+    // Auto smart aggregate into "💳 Banking & Payments"
+    if (isFinanceOrPaymentScreenshot(sc)) {
+      const bankColName = "💳 Banking & Payments";
+      const bankCol = collectionMap.get(bankColName);
+      if (bankCol) {
+        bankCol.itemCount = (bankCol.itemCount || 0) + (name === bankColName ? 0 : 1);
+        if (!bankCol.coverImageUrl) bankCol.coverImageUrl = sc.thumbnailUri || sc.imageUrl;
+      } else {
+        const preset = COLLECTION_PRESETS[bankColName];
+        collectionMap.set(bankColName, {
+          id: `col_smart_banking`,
+          name: bankColName,
+          description: preset.description,
+          coverImageUrl: sc.thumbnailUri || sc.imageUrl,
+          isAiGenerated: true,
+          createdAt: new Date().toISOString(),
+          itemCount: 1,
+          color: preset.color,
+          icon: preset.icon,
+        });
+      }
+    }
+
+    // Auto smart aggregate into "🔒 Private & Sensitive"
+    if (isSensitiveScreenshot(sc)) {
+      const privColName = "🔒 Private & Sensitive";
+      const privCol = collectionMap.get(privColName);
+      if (privCol) {
+        privCol.itemCount = (privCol.itemCount || 0) + (name === privColName ? 0 : 1);
+        if (!privCol.coverImageUrl) privCol.coverImageUrl = sc.thumbnailUri || sc.imageUrl;
+      } else {
+        const preset = COLLECTION_PRESETS[privColName];
+        collectionMap.set(privColName, {
+          id: `col_smart_private`,
+          name: privColName,
+          description: preset.description,
+          coverImageUrl: sc.thumbnailUri || sc.imageUrl,
+          isAiGenerated: true,
+          createdAt: new Date().toISOString(),
+          itemCount: 1,
+          color: preset.color,
+          icon: preset.icon,
+        });
+      }
+    }
+
+    // Auto track "🔐 Vault"
+    if (sc.in_vault || sc.inVault) {
+      const vaultColName = VAULT_COLLECTION_NAME;
+      const vaultCol = collectionMap.get(vaultColName);
+      if (vaultCol) {
+        vaultCol.itemCount = (vaultCol.itemCount || 0) + (name === vaultColName ? 0 : 1);
+        if (!vaultCol.coverImageUrl) vaultCol.coverImageUrl = sc.thumbnailUri || sc.imageUrl;
+      } else {
+        const preset = COLLECTION_PRESETS[vaultColName];
+        collectionMap.set(vaultColName, {
+          id: `col_smart_vault`,
+          name: vaultColName,
+          description: preset.description,
+          coverImageUrl: sc.thumbnailUri || sc.imageUrl,
+          isAiGenerated: true,
+          createdAt: new Date().toISOString(),
+          itemCount: 1,
+          color: preset.color,
+          icon: preset.icon,
+        });
+      }
+    }
   });
 
-  // 3. Ensure cover images are up-to-date with latest screenshot if empty
+  // 3. Attach current real-time lock states to each collection
+  collectionMap.forEach((col, name) => {
+    col.isLocked = collectionSecurity.isCollectionLocked(name);
+    col.lockType = collectionSecurity.getCollectionLockType(name);
+    col.hasLock = collectionSecurity.hasCollectionLock(name);
+  });
+
+  // 4. Ensure cover images are up-to-date with latest screenshot if empty
   collectionMap.forEach((col, name) => {
     if (!col.coverImageUrl || col.coverImageUrl.length === 0) {
       const match = screenshots.find(

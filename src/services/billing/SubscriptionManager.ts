@@ -281,8 +281,8 @@ class SubscriptionManagerService {
       used: quota.used,
       remaining: 0,
       reason: `Plan limit of ${quota.limit} AI-indexed screenshots reached.`,
-      upgradePromptTitle: "AI-Indexing Limit Reached",
-      upgradePromptMessage: `You've reached your plan's AI-indexing limit (${quota.used} / ${quota.limit} AI-indexed screenshots used). Upgrade to Pro for higher capacity and priority processing.`,
+      upgradePromptTitle: "Your indexing limit has been reached.",
+      upgradePromptMessage: `Your indexing limit has been reached (${quota.used} / ${quota.limit} AI-indexed screenshots used). Upgrade to Monthly, Annual, or claim a permanent Founder Lifetime seat.`,
     };
   }
 

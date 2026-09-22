@@ -33,12 +33,17 @@ import {
   FileText,
   Shield,
   CreditCard,
+  Lock,
+  Unlock,
+  KeyRound,
 } from "lucide-react";
 import { CollectionItem, ScreenshotItem, CategoryType } from "../types";
 import { ScreenshotCard } from "./ScreenshotCard";
 import { useEntitlement } from "../hooks/useEntitlement";
 import { UpgradeModal, ProBadge } from "./subscription/UpgradePrompt";
 import { PageHeroHeader } from "./PageHeroHeader";
+import { collectionSecurity, VAULT_COLLECTION_NAME } from "../services/collectionSecurity";
+import { SecurityLockModal } from "./SecurityLockModal";
 
 interface CollectionsViewProps {
   collections: CollectionItem[];
@@ -211,6 +216,31 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
   // Menu popover per card
   const [activeMenuCollection, setActiveMenuCollection] = useState<string | null>(null);
 
+  // Security Lock Modal State
+  const [securityModal, setSecurityModal] = useState<{
+    isOpen: boolean;
+    collectionName: string;
+    mode: "unlock" | "configure";
+    pendingTargetCollection?: string;
+  }>({
+    isOpen: false,
+    collectionName: "",
+    mode: "unlock",
+  });
+
+  const handleCollectionClick = (col: CollectionItem) => {
+    if (collectionSecurity.isCollectionLocked(col.name)) {
+      setSecurityModal({
+        isOpen: true,
+        collectionName: col.name,
+        mode: "unlock",
+        pendingTargetCollection: col.name,
+      });
+      return;
+    }
+    setSelectedCollectionName(col.name);
+  };
+
   // Filter collections
   const filteredCollections = collections.filter(
     (c) =>
@@ -363,6 +393,43 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
             </button>
 
             <div className="flex flex-wrap items-center gap-2">
+              {/* Security Lock / Protect Button */}
+              {selectedCollectionName && collectionSecurity.hasCollectionLock(selectedCollectionName) ? (
+                <button
+                  onClick={() => {
+                    collectionSecurity.lockCollection(selectedCollectionName);
+                    setSelectedCollectionName(null);
+                    addToast({
+                      title: "Collection Locked",
+                      description: `Locked "${selectedCollectionName}".`,
+                      type: "info",
+                    });
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                  title="Lock this album now"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Lock Album</span>
+                </button>
+              ) : (
+                selectedCollectionName && (
+                  <button
+                    onClick={() => {
+                      setSecurityModal({
+                        isOpen: true,
+                        collectionName: selectedCollectionName,
+                        mode: "configure",
+                      });
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                    title="Protect album with Pattern, PIN, or Password"
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Lock Album</span>
+                  </button>
+                )
+              )}
+
               <button
                 onClick={() => {
                   setRenameTarget(selectedCollectionName);
@@ -583,7 +650,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                   key={col.name}
                   whileHover={{ y: -6 }}
                   transition={{ duration: 0.25 }}
-                  onClick={() => setSelectedCollectionName(col.name)}
+                  onClick={() => handleCollectionClick(col)}
                   className={`group relative rounded-3xl border p-4 cursor-pointer transition-all duration-300 ${
                     isDark
                       ? "bg-[#121821] hover:bg-[#18202B] border-white/[0.08] hover:border-[#3B82F6]/50 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10"
@@ -625,19 +692,39 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                       </div>
                     )}
 
+                    {/* Security Lock Overlay if locked */}
+                    {collectionSecurity.isCollectionLocked(col.name) && (
+                      <div className="absolute inset-0 bg-black/75 backdrop-blur-md z-20 flex flex-col items-center justify-center p-4 text-center">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-2 shadow-lg">
+                          <Lock className="w-5 h-5" />
+                        </div>
+                        <span className="text-xs font-bold text-white">Album Locked</span>
+                        <span className="text-[10px] text-slate-300 mt-0.5">Tap to unlock</span>
+                      </div>
+                    )}
+
                     {/* Gradient Overlay & Badge */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10 flex flex-col justify-between p-3 pointer-events-none">
                       <div className="flex items-center justify-between">
-                        {col.isAiGenerated ? (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3B82F6]/90 text-white backdrop-blur-md border border-blue-400/30 flex items-center gap-1 shadow-md">
-                            <Sparkles className="w-2.5 h-2.5 text-blue-200" />
-                            AI Classified
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-600/80 text-white backdrop-blur-md border border-purple-400/30 shadow-md">
-                            Custom Album
-                          </span>
-                        )}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {col.isAiGenerated ? (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#3B82F6]/90 text-white backdrop-blur-md border border-blue-400/30 flex items-center gap-1 shadow-md">
+                              <Sparkles className="w-2.5 h-2.5 text-blue-200" />
+                              AI Classified
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-purple-600/80 text-white backdrop-blur-md border border-purple-400/30 shadow-md">
+                              Custom Album
+                            </span>
+                          )}
+
+                          {collectionSecurity.hasCollectionLock(col.name) && (
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/85 text-white backdrop-blur-md border border-amber-400/40 flex items-center gap-1 shadow-md">
+                              <Lock className="w-2.5 h-2.5" />
+                              <span>{collectionSecurity.isCollectionLocked(col.name) ? "Locked" : "Unlocked"}</span>
+                            </span>
+                          )}
+                        </div>
 
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-black/60 text-white backdrop-blur-md border border-white/20 shadow-md">
                           {col.itemCount || 0} items
@@ -685,6 +772,30 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                             <span>Rename</span>
+                          </button>
+
+                          <button
+                            onClick={() => {
+                              setActiveMenuCollection(null);
+                              if (collectionSecurity.isCollectionLocked(col.name)) {
+                                setSecurityModal({
+                                  isOpen: true,
+                                  collectionName: col.name,
+                                  mode: "unlock",
+                                  pendingTargetCollection: col.name,
+                                });
+                              } else {
+                                setSecurityModal({
+                                  isOpen: true,
+                                  collectionName: col.name,
+                                  mode: "configure",
+                                });
+                              }
+                            }}
+                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-amber-300 hover:bg-amber-600/20 rounded-xl transition-all"
+                          >
+                            <Shield className="w-3.5 h-3.5 text-amber-400" />
+                            <span>{collectionSecurity.hasCollectionLock(col.name) ? "Lock Settings" : "Protect with Lock"}</span>
                           </button>
 
                           <button
@@ -1099,6 +1210,21 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
         onClose={closeUpgradeModal}
         feature={activePromptContext.feature || "aiCollections"}
         isDark={isDark}
+      />
+
+      {/* Security Lock Modal for Pattern/PIN/Password */}
+      <SecurityLockModal
+        isOpen={securityModal.isOpen}
+        onClose={() => setSecurityModal((prev) => ({ ...prev, isOpen: false }))}
+        collectionName={securityModal.collectionName}
+        mode={securityModal.mode}
+        onSuccess={() => {
+          if (securityModal.pendingTargetCollection) {
+            setSelectedCollectionName(securityModal.pendingTargetCollection);
+          }
+          setSecurityModal((prev) => ({ ...prev, isOpen: false, pendingTargetCollection: undefined }));
+        }}
+        addToast={addToast}
       />
     </div>
   );

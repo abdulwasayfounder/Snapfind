@@ -289,6 +289,7 @@ class SyncEngineService {
       date_modified: item.dateModified || item.date_modified || new Date().toISOString(),
       created_at: item.createdAt || item.date_created || new Date().toISOString(),
       indexed_at: item.indexedAt || item.indexed_at || new Date().toISOString(),
+      content_hash: item.content_hash || item.contentHash || item.sha256Hash || item.hash || item.sha256_hash || item.fileHash || null,
       sha256_hash: item.sha256Hash || item.hash || item.sha256_hash || item.fileHash || null,
       file_hash: item.sha256Hash || item.hash || item.sha256_hash || item.fileHash || null,
       website_name: item.website_name || item.websiteName || item.website?.name || null,

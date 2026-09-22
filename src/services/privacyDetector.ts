@@ -123,6 +123,16 @@ export function maskSensitiveOcrText(text: string): string {
     return match.replace(otp, "••••••");
   });
 
+  // Mask International Bank Account Number (IBAN)
+  masked = masked.replace(PATTERNS.iban, (match) => {
+    if (match.length > 8) {
+      const prefix = match.slice(0, 4);
+      const suffix = match.slice(-4);
+      return `${prefix}••••••••${suffix}`;
+    }
+    return match;
+  });
+
   return masked;
 }
 

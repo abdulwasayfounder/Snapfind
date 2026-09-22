@@ -1,5 +1,7 @@
 import { ScreenshotItem, SearchResultMatch, CategoryType } from "../types";
 import { loadSearchHistory, saveSearchHistory } from "./storage";
+import { collectionSecurity } from "./collectionSecurity";
+import { isFinanceOrPaymentScreenshot } from "./smartSnapsClassifier";
 import FlexSearch from "flexsearch";
 
 export interface SearchFilters {
@@ -562,6 +564,11 @@ export class SnapFindSearchEngine {
 
     // 1. Filter candidates by structural rules
     const candidates = items.filter((item) => {
+      // Security filter: items inside locked collections or locked vault are hidden until unlocked
+      if (!collectionSecurity.isItemAccessible(item)) {
+        return false;
+      }
+
       if (filters.type === "screenshots_only" && !item.isScreenshot && !item.is_screenshot) return false;
       if (filters.type === "photos_only" && (item.isScreenshot || item.is_screenshot)) return false;
 
@@ -880,6 +887,23 @@ export class SnapFindSearchEngine {
       }
     }
 
+    // Financial & Banking Intent (e.g. "Find my payment screenshot", "bank transfer", "receipt")
+    const queryLower = intent.rawQuery.toLowerCase();
+    const isFinancialQuery =
+      queryLower.includes("bank") ||
+      queryLower.includes("payment") ||
+      queryLower.includes("transfer") ||
+      queryLower.includes("upi") ||
+      queryLower.includes("transaction") ||
+      queryLower.includes("receipt") ||
+      queryLower.includes("invoice") ||
+      queryLower.includes("money");
+
+    if (isFinancialQuery && (isFinanceOrPaymentScreenshot(item) || item.category === "Financial" || item.smart_category === "Banking")) {
+      intentMatchBoost += 0.60;
+      matchReasons.push("Matched Banking & Payment Snaps");
+    }
+
     // Color Document Intent (e.g. "Blue document")
     if (intent.colorDescriptor) {
       const tagsLower = (item.tags || []).map((t) => t.toLowerCase());
@@ -937,7 +961,11 @@ export class SnapFindSearchEngine {
     // Normalize final score [0.20 - 1.0] for valid matches
     const finalScore = Math.min(1.0, Math.max(0.20, Math.round((rawTotalScore / 6.0) * 100) / 100));
 
-    const snippetText = item.summary || item.fullText?.slice(0, 140) || item.title;
+    // Masked snippet for sensitive/private items to ensure no credentials or numbers leak in search preview
+    let snippetText = item.summary || item.fullText?.slice(0, 140) || item.title;
+    if (item.is_sensitive || item.isSensitive || item.privacy_level === "private" || item.privacy_level === "highly_sensitive") {
+      snippetText = item.masked_ocr_text || item.maskedOcrText || item.summary || item.title;
+    }
     const primaryReason =
       matchReasons.length > 0
         ? matchReasons.join(" • ")
