@@ -1,5 +1,5 @@
 {
-  "founderCounter": 2,
+  "founderCounter": 3,
   "entitlements": {
     "d00cf7d1-34eb-43ed-a91e-86619c172cf8": {
       "userId": "d00cf7d1-34eb-43ed-a91e-86619c172cf8",
@@ -10,7 +10,7 @@
       "isLifetime": true,
       "founderNumber": 1,
       "founderRank": 1,
-      "founderGrantedAt": "2026-09-02T16:50:37.362Z",
+      "founderGrantedAt": "2026-09-23T08:51:35.219Z",
       "founderExpiresAt": null,
       "features": {
         "maxIndexedScreenshots": 150000,
@@ -26,7 +26,7 @@
       "canAiMultimodalSearch": true,
       "priorityProcessing": true,
       "status": "active",
-      "updatedAt": "2026-09-02T16:50:37.362Z"
+      "updatedAt": "2026-09-23T08:51:35.219Z"
     },
     "67484df8-d65e-4c7c-aa60-c361955655da": {
       "userId": "67484df8-d65e-4c7c-aa60-c361955655da",
@@ -37,7 +37,7 @@
       "isLifetime": true,
       "founderNumber": 2,
       "founderRank": 2,
-      "founderGrantedAt": "2026-09-02T16:50:37.362Z",
+      "founderGrantedAt": "2026-09-23T08:51:35.219Z",
       "founderExpiresAt": null,
       "features": {
         "maxIndexedScreenshots": 150000,
@@ -53,7 +53,34 @@
       "canAiMultimodalSearch": true,
       "priorityProcessing": true,
       "status": "active",
-      "updatedAt": "2026-09-02T16:50:37.362Z"
+      "updatedAt": "2026-09-23T08:51:35.219Z"
+    },
+    "2e87bf41-8f8a-4d10-a0e4-6231c60b60af": {
+      "userId": "2e87bf41-8f8a-4d10-a0e4-6231c60b60af",
+      "plan": "founder",
+      "tier": "Founder",
+      "isPro": true,
+      "isFounder": true,
+      "isLifetime": true,
+      "founderNumber": 3,
+      "founderRank": 3,
+      "founderGrantedAt": "2026-09-23T08:51:35.219Z",
+      "founderExpiresAt": null,
+      "features": {
+        "maxIndexedScreenshots": 150000,
+        "maxAIScansPerMonth": 150000,
+        "maxStorageMB": 100000,
+        "cloudSync": true,
+        "advancedSearch": true,
+        "aiCollections": true,
+        "priorityProcessing": true
+      },
+      "maxScreenshots": 150000,
+      "canCloudSync": true,
+      "canAiMultimodalSearch": true,
+      "priorityProcessing": true,
+      "status": "active",
+      "updatedAt": "2026-09-23T08:51:35.219Z"
     }
   },
   "subscriptions": {},
@@ -62,5 +89,5 @@
   "subscriptionEvents": [],
   "processedPaddleEvents": [],
   "usageStore": {},
-  "updatedAt": "2026-09-02T16:50:37.362Z"
+  "updatedAt": "2026-09-23T08:51:35.219Z"
 }

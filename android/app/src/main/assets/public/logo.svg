@@ -1,0 +1,85 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg-glow" cx="52%" cy="46%" r="48%" fx="50%" fy="42%">
+      <stop offset="0%" stop-color="#00FF66" stop-opacity="0.18"/>
+      <stop offset="45%" stop-color="#CCFF00" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#07090D" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lens-grad" x1="26" y1="20" x2="70" y2="66" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="45%" stop-color="#84FF1A"/>
+      <stop offset="100%" stop-color="#00FF66"/>
+    </linearGradient>
+    <linearGradient id="handle-grad" x1="60" y1="58" x2="85" y2="83" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="30%" stop-color="#0D1117"/>
+      <stop offset="70%" stop-color="#121821"/>
+      <stop offset="100%" stop-color="#00FF66"/>
+    </linearGradient>
+    <linearGradient id="trail-top" x1="18" y1="28" x2="32" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF6600"/>
+      <stop offset="100%" stop-color="#FF8800"/>
+    </linearGradient>
+    <linearGradient id="trail-mid1" x1="12" y1="38" x2="36" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FF6600"/>
+      <stop offset="40%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#CCFF00"/>
+    </linearGradient>
+    <linearGradient id="trail-mid2" x1="8" y1="48" x2="32" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="70%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#00FF66"/>
+    </linearGradient>
+    <linearGradient id="trail-bot" x1="14" y1="58" x2="30" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#CCFF00"/>
+      <stop offset="100%" stop-color="#00FF66"/>
+    </linearGradient>
+    <linearGradient id="trail-lowest" x1="22" y1="68" x2="34" y2="68" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00FF66"/>
+      <stop offset="100%" stop-color="#00FF66"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 1. Obsidian Black Base -->
+  <rect width="100" height="100" rx="22" fill="#07090D"/>
+  <circle cx="50" cy="45" r="42" fill="url(#bg-glow)"/>
+
+  <!-- 2. Horizontal Speed / Scan Trails -->
+  <g stroke-linecap="round" opacity="0.95">
+    <circle cx="14" cy="28" r="1.8" fill="#FF6600"/>
+    <line x1="20" y1="28" x2="30" y2="28" stroke="url(#trail-top)" stroke-width="3"/>
+    <circle cx="9" cy="38" r="1.8" fill="#FF6600"/>
+    <line x1="14" y1="38" x2="33" y2="38" stroke="url(#trail-mid1)" stroke-width="3.2"/>
+    <circle cx="6" cy="48" r="1.8" fill="#CCFF00"/>
+    <line x1="11" y1="48" x2="28" y2="48" stroke="url(#trail-mid2)" stroke-width="3.4"/>
+    <circle cx="10" cy="58" r="1.8" fill="#CCFF00"/>
+    <line x1="15" y1="58" x2="28" y2="58" stroke="url(#trail-bot)" stroke-width="3.2"/>
+    <line x1="20" y1="68" x2="29" y2="68" stroke="url(#trail-lowest)" stroke-width="2.8"/>
+  </g>
+
+  <!-- 3. Magnifying Glass Handle -->
+  <g stroke-linecap="round" stroke-linejoin="round">
+    <line x1="59" y1="57" x2="81" y2="79" stroke="#07090D" stroke-width="8" opacity="0.8"/>
+    <line x1="59" y1="57" x2="81" y2="79" stroke="url(#handle-grad)" stroke-width="6.2"/>
+    <circle cx="81" cy="79" r="3.1" fill="#00FF66"/>
+  </g>
+
+  <!-- 4. Magnifying Glass Lens Rim -->
+  <circle cx="49" cy="43" r="20" stroke="url(#lens-grad)" stroke-width="5.5" fill="#07090D" fill-opacity="0.4"/>
+  <path d="M 37 35 A 16 16 0 0 1 61 35" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- 5. Viewfinder Brackets -->
+  <g stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 38 31 L 38 29 A 2.5 2.5 0 0 1 40.5 26.5 L 43.5 26.5"/>
+    <path d="M 54.5 26.5 L 57.5 26.5 A 2.5 2.5 0 0 1 60 29 L 60 31"/>
+    <path d="M 38 55 L 38 57 A 2.5 2.5 0 0 0 40.5 59.5 L 43.5 59.5"/>
+    <path d="M 54.5 59.5 L 57.5 59.5 A 2.5 2.5 0 0 0 60 57 L 60 55"/>
+  </g>
+
+  <!-- 6. Screenshot / Photo Symbol Inside Lens -->
+  <rect x="40" y="28.5" width="18" height="17" rx="3.5" fill="#0D1117" stroke="#CCFF00" stroke-width="1.6"/>
+  <path d="M 54.5 28.5 L 58 32 L 54.5 32 Z" fill="#CCFF00" opacity="0.9"/>
+  <circle cx="44.5" cy="33" r="1.5" fill="#FFFFFF"/>
+  <path d="M 41.5 43.5 L 46.5 37.5 L 50 41 L 53.5 36.5 L 57 43.5 Z" fill="#FFFFFF" opacity="0.95"/>
+  <path d="M 46.5 37.5 L 50 41 L 53.5 36.5 L 57 43.5 L 49.5 43.5 Z" fill="#00FF66" opacity="0.35"/>
+</svg>
