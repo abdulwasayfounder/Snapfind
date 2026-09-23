@@ -1,0 +1,136 @@
+name: Build SnapFind Android Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version"
+        required: true
+        default: "v1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Find Android project
+        shell: bash
+        run: |
+          PROJECT_DIR=$(dirname "$(find . -type f \( -name settings.gradle.kts -o -name settings.gradle \) -print -quit)")
+
+          if [ -z "$PROJECT_DIR" ]; then
+            echo "Android project not found."
+            exit 1
+          fi
+
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
+          echo "Found Android project: $PROJECT_DIR"
+
+      - name: Make Gradle executable
+        run: chmod +x "$PROJECT_DIR/gradlew"
+
+      - name: Build release APK
+        run: |
+          "$PROJECT_DIR/gradlew" \
+            -p "$PROJECT_DIR" \
+            clean \
+            assembleRelease
+
+      - name: Find generated APK
+        shell: bash
+        run: |
+          APK=$(find "$PROJECT_DIR/app/build/outputs/apk/release" \
+            -maxdepth 1 \
+            -type f \
+            -name '*unsigned.apk' \
+            -print -quit)
+
+          if [ -z "$APK" ]; then
+            APK=$(find "$PROJECT_DIR/app/build/outputs/apk/release" \
+              -maxdepth 1 \
+              -type f \
+              -name '*.apk' \
+              -print -quit)
+          fi
+
+          if [ -z "$APK" ]; then
+            echo "APK was not generated."
+            exit 1
+          fi
+
+          echo "APK=$APK" >> "$GITHUB_ENV"
+          echo "Generated: $APK"
+
+      - name: Decode signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/snapfind-release.jks"
+
+      - name: Align and sign APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        shell: bash
+        run: |
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            | sort -V \
+            | tail -n 1)
+
+          echo "Using build tools: $BUILD_TOOLS"
+
+          "$BUILD_TOOLS/zipalign" \
+            -p -f 4 \
+            "$APK" \
+            "$RUNNER_TEMP/aligned.apk"
+
+          "$BUILD_TOOLS/apksigner" sign \
+            --ks "$RUNNER_TEMP/snapfind-release.jks" \
+            --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD \
+            --key-pass env:KEYSTORE_PASSWORD \
+            --out "$RUNNER_TEMP/SnapFind.apk" \
+            "$RUNNER_TEMP/aligned.apk"
+
+          "$BUILD_TOOLS/apksigner" verify \
+            --verbose \
+            "$RUNNER_TEMP/SnapFind.apk"
+
+      - name: Prepare release asset
+        run: |
+          mkdir -p release
+          cp "$RUNNER_TEMP/SnapFind.apk" \
+            "release/SnapFind-${{ inputs.version }}.apk"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SnapFind-${{ inputs.version }}
+          path: release/SnapFind-${{ inputs.version }}.apk
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ inputs.version }}" \
+            "release/SnapFind-${{ inputs.version }}.apk" \
+            --title "SnapFind ${{ inputs.version }}" \
+            --notes "SnapFind Android release ${{ inputs.version }}"
