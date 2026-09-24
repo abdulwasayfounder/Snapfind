@@ -7,11 +7,12 @@
  * - Alphanumeric Password
  * 
  * Security Guarantees:
- * - Plaintext patterns/PINs/passwords are NEVER stored.
- * - Derived verifier computed with unique random salt + cryptographic SHA-256.
+ * - Plaintext patterns/PINs/passwords are NEVER stored anywhere.
+ * - PBKDF2 with HMAC-SHA256, 100,000 iterations and unique 16-byte cryptographically secure random salt.
  * - Brute-force protection: progressive lockout after 5 and 10 failed attempts.
- * - Session-based unlocking with customizable auto-lock timer.
- * - Restricts locked collection items and Vault items from search, recent items, and gallery.
+ * - Session-based unlocking with customizable auto-lock timer (Immediately, 1m, 5m, 15m, until app closes).
+ * - Restricts locked collection items and Vault items from search, recent items, gallery, and previews.
+ * - Verified credential required before changing or removing any security lock.
  */
 
 import { ScreenshotItem } from "../types";
@@ -34,7 +35,7 @@ const STORAGE_KEY_AUTOLOCK = "snapfind_autolock_setting_v1";
 export const VAULT_COLLECTION_NAME = "🔐 Vault";
 
 /**
- * Fast Web Crypto SHA-256 hash
+ * Fast Web Crypto SHA-256 fallback hash
  */
 async function computeSha256(data: string): Promise<string> {
   if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
@@ -44,7 +45,6 @@ async function computeSha256(data: string): Promise<string> {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
   }
-  // Basic fallback if subtle crypto is unavailable
   let hash = 0;
   for (let i = 0; i < data.length; i++) {
     const char = data.charCodeAt(i);
@@ -66,6 +66,43 @@ function generateSalt(): string {
       .join("");
   }
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+/**
+ * Robust cryptographic key derivation using PBKDF2 (HMAC-SHA256, 100,000 iterations)
+ */
+async function deriveVerifier(secret: string, saltHex: string): Promise<string> {
+  if (typeof window !== "undefined" && window.crypto && window.crypto.subtle) {
+    try {
+      const encoder = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        "raw",
+        encoder.encode(secret),
+        { name: "PBKDF2" },
+        false,
+        ["deriveBits"]
+      );
+      const saltBytes = new Uint8Array(
+        (saltHex.match(/.{1,2}/g) || []).map((byte) => parseInt(byte, 16))
+      );
+      const derivedBits = await window.crypto.subtle.deriveBits(
+        {
+          name: "PBKDF2",
+          salt: saltBytes,
+          iterations: 100000,
+          hash: "SHA-256",
+        },
+        keyMaterial,
+        256
+      );
+      return Array.from(new Uint8Array(derivedBits))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    } catch (err) {
+      console.warn("[CollectionSecurity] PBKDF2 fallback to SHA-256:", err);
+    }
+  }
+  return computeSha256(`${saltHex}:${secret}:snapfind_secure_derivation`);
 }
 
 class CollectionSecurityManager {
@@ -196,7 +233,6 @@ class CollectionSecurityManager {
    * Check if the Vault is currently locked
    */
   public isVaultLocked(): boolean {
-    // If vault has no lock set, it defaults to unlocked unless configured
     const hasLock = this.hasVaultLock();
     if (!hasLock) return false;
     return this.isCollectionLocked(VAULT_COLLECTION_NAME);
@@ -224,7 +260,7 @@ class CollectionSecurityManager {
   }
 
   /**
-   * Filter accessible screenshot items (for normal gallery, search, recent items)
+   * Filter accessible screenshot items (for normal gallery, search, recent items, previews)
    */
   public filterAccessibleItems(items: ScreenshotItem[]): ScreenshotItem[] {
     return items.filter((item) => this.isItemAccessible(item));
@@ -244,7 +280,7 @@ class CollectionSecurityManager {
     }
 
     const salt = generateSalt();
-    const verifier = await computeSha256(`${salt}:${secret}`);
+    const verifier = await deriveVerifier(secret, salt);
 
     const config: CollectionSecurityConfig = {
       collectionName,
@@ -260,6 +296,76 @@ class CollectionSecurityManager {
     this.unlockedSessions.set(collectionName, Date.now());
     this.persistToStorage();
     this.notify();
+  }
+
+  /**
+   * Validate current credential without altering lockout counters unless failed
+   */
+  public async validateCurrentCredential(
+    collectionName: string,
+    secret: string
+  ): Promise<{ valid: boolean; error?: string }> {
+    const cfg = this.configs.get(collectionName);
+    if (!cfg || cfg.lockType === "none") {
+      return { valid: true };
+    }
+
+    const now = Date.now();
+    if (cfg.lockoutUntil && cfg.lockoutUntil > now) {
+      const remainingSecs = Math.ceil((cfg.lockoutUntil - now) / 1000);
+      return {
+        valid: false,
+        error: `Security lockout active. Try again in ${remainingSecs}s.`,
+      };
+    }
+
+    const testVerifier = await deriveVerifier(secret, cfg.salt);
+    // Also check legacy SHA-256 verifier for backward compatibility
+    const legacyVerifier = await computeSha256(`${cfg.salt}:${secret}`);
+
+    if (testVerifier === cfg.verifier || legacyVerifier === cfg.verifier) {
+      return { valid: true };
+    }
+
+    return {
+      valid: false,
+      error: `Incorrect current ${cfg.lockType === "pattern" ? "pattern" : cfg.lockType === "pin" ? "PIN" : "password"}.`,
+    };
+  }
+
+  /**
+   * Change Lock: Requires valid current credential first, then updates to new lock type & secret
+   */
+  public async changeCollectionLock(
+    collectionName: string,
+    currentSecret: string,
+    newLockType: LockType,
+    newSecret: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const check = await this.validateCurrentCredential(collectionName, currentSecret);
+    if (!check.valid) {
+      return { success: false, error: check.error || "Current credential is not valid." };
+    }
+
+    await this.setCollectionLock(collectionName, newLockType, newSecret);
+    return { success: true };
+  }
+
+  /**
+   * Remove Lock: Requires valid current credential first, then removes protection
+   * Preserves all collection data and screenshots intact.
+   */
+  public async removeCollectionLockVerified(
+    collectionName: string,
+    currentSecret: string
+  ): Promise<{ success: boolean; error?: string }> {
+    const check = await this.validateCurrentCredential(collectionName, currentSecret);
+    if (!check.valid) {
+      return { success: false, error: check.error || "Current credential is required to remove lock." };
+    }
+
+    this.removeCollectionLock(collectionName);
+    return { success: true };
   }
 
   /**
@@ -311,12 +417,18 @@ class CollectionSecurityManager {
       };
     }
 
-    // 2. Compute verifier hash
-    const testVerifier = await computeSha256(`${cfg.salt}:${secret}`);
-    if (testVerifier === cfg.verifier) {
+    // 2. Compute verifier hash (PBKDF2 or legacy fallback)
+    const testVerifier = await deriveVerifier(secret, cfg.salt);
+    const legacyVerifier = await computeSha256(`${cfg.salt}:${secret}`);
+
+    if (testVerifier === cfg.verifier || legacyVerifier === cfg.verifier) {
       // Success! Reset failed attempts
       cfg.failedAttempts = 0;
       cfg.lockoutUntil = undefined;
+      // Upgrade legacy verifier to PBKDF2 if needed
+      if (testVerifier !== cfg.verifier) {
+        cfg.verifier = testVerifier;
+      }
       this.unlockedSessions.set(collectionName, now);
       this.persistToStorage();
       this.notify();

@@ -220,7 +220,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
   const [securityModal, setSecurityModal] = useState<{
     isOpen: boolean;
     collectionName: string;
-    mode: "unlock" | "configure";
+    mode: "unlock" | "configure" | "change" | "remove" | "settings";
     pendingTargetCollection?: string;
   }>({
     isOpen: false,
@@ -393,24 +393,41 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
             </button>
 
             <div className="flex flex-wrap items-center gap-2">
-              {/* Security Lock / Protect Button */}
+              {/* Security Lock Controls */}
               {selectedCollectionName && collectionSecurity.hasCollectionLock(selectedCollectionName) ? (
-                <button
-                  onClick={() => {
-                    collectionSecurity.lockCollection(selectedCollectionName);
-                    setSelectedCollectionName(null);
-                    addToast({
-                      title: "Collection Locked",
-                      description: `Locked "${selectedCollectionName}".`,
-                      type: "info",
-                    });
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                  title="Lock this album now"
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>Lock Album</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      setSecurityModal({
+                        isOpen: true,
+                        collectionName: selectedCollectionName,
+                        mode: "settings",
+                      });
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-[#CCFF00]/10 hover:bg-[#CCFF00]/20 text-[#CCFF00] border border-[#CCFF00]/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-sm"
+                    title="Manage security, change lock method, or remove lock"
+                  >
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Security Settings</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      collectionSecurity.lockCollection(selectedCollectionName);
+                      setSelectedCollectionName(null);
+                      addToast({
+                        title: "Collection Locked",
+                        description: `Locked "${selectedCollectionName}".`,
+                        type: "info",
+                      });
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                    title="Lock this album now"
+                  >
+                    <Lock className="w-3.5 h-3.5" />
+                    <span>Lock Album</span>
+                  </button>
+                </>
               ) : (
                 selectedCollectionName && (
                   <button
@@ -425,7 +442,7 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                     title="Protect album with Pattern, PIN, or Password"
                   >
                     <Shield className="w-3.5 h-3.5" />
-                    <span>Lock Album</span>
+                    <span>Set Lock</span>
                   </button>
                 )
               )}
@@ -783,6 +800,12 @@ export const CollectionsView: React.FC<CollectionsViewProps> = ({
                                   collectionName: col.name,
                                   mode: "unlock",
                                   pendingTargetCollection: col.name,
+                                });
+                              } else if (collectionSecurity.hasCollectionLock(col.name)) {
+                                setSecurityModal({
+                                  isOpen: true,
+                                  collectionName: col.name,
+                                  mode: "settings",
                                 });
                               } else {
                                 setSecurityModal({

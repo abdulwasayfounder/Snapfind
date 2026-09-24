@@ -46,7 +46,13 @@ export type ProcessingJobStatus =
   | "Updating Search Index"
   | "Completed"
   | "CompletedWithLimitedMetadata"
-  | "Failed";
+  | "Failed"
+  | "pending"
+  | "processing"
+  | "waiting_for_network"
+  | "waiting_for_verification"
+  | "completed"
+  | "failed";
 
 export interface ScreenshotItem {
   id: string;

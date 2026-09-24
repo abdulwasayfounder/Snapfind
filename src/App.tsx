@@ -38,6 +38,7 @@ import {
 import { nativeMediaScanner } from "./services/nativeMediaScanner";
 import { searchScreenshotsAI, instantKeywordSearch } from "./services/api";
 
+import { collectionSecurity } from "./services/collectionSecurity";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { Navbar } from "./components/Navbar";
@@ -242,6 +243,20 @@ function AppContent() {
   const trashScreenshots = useMemo(() => {
     return screenshots.filter((item) => Boolean(item.isDeleted || item.is_deleted));
   }, [screenshots]);
+
+  // Subscribe to collection security lock/unlock updates
+  const [securityNonce, setSecurityNonce] = useState(0);
+  useEffect(() => {
+    const unsub = collectionSecurity.subscribe(() => {
+      setSecurityNonce((n) => n + 1);
+    });
+    return unsub;
+  }, []);
+
+  // Filter out locked collection contents and locked vault items from normal gallery/search/timeline
+  const accessibleScreenshots = useMemo(() => {
+    return activeScreenshots.filter((item) => collectionSecurity.isItemAccessible(item));
+  }, [activeScreenshots, securityNonce]);
 
   // Subscribe to NotificationService singleton
   useEffect(() => {
@@ -518,7 +533,7 @@ function AppContent() {
     }
 
     // 1. Instant local search (0ms latency)
-    const instantResults = instantKeywordSearch(q, activeScreenshots);
+    const instantResults = instantKeywordSearch(q, accessibleScreenshots);
     setSearchResults(instantResults);
     setActiveView("search");
 
@@ -537,7 +552,7 @@ function AppContent() {
     // 2. Background AI refinement (non-blocking)
     setIsSearching(true);
     try {
-      const results = await searchScreenshotsAI(q, activeScreenshots);
+      const results = await searchScreenshotsAI(q, accessibleScreenshots);
       if (results && results.length > 0) {
         setSearchResults(results);
       }
@@ -1162,7 +1177,7 @@ function AppContent() {
                   <GalleryPermissionModal onManualUploadClick={() => setActiveView("import")} />
 
                   <DashboardView
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     collections={collections}
                     searchHistory={searchHistory}
                     isDark={isDark}
@@ -1224,7 +1239,7 @@ function AppContent() {
                   isDark={isDark}
                 >
                   <TimelineView
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     isDark={isDark}
                     onSelectScreenshot={(item) => setSelectedItem(item)}
                     onToggleFavorite={handleToggleFavorite}
@@ -1254,7 +1269,7 @@ function AppContent() {
                   isDark={isDark}
                 >
                   <FavoritesView
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     isDark={isDark}
                     onSelectScreenshot={(item) => setSelectedItem(item)}
                     onToggleFavorite={handleToggleFavorite}
@@ -1324,19 +1339,19 @@ function AppContent() {
                     setSelectedCategory={setSelectedCategory}
                     isDark={isDark}
                     isSearching={isSearching}
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     searchHistory={searchHistory}
                     onDeleteHistoryItem={handleDeleteHistoryItem}
                   />
 
                   <StatsOverview
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     isDark={isDark}
                     onSelectCategory={(cat) => setSelectedCategory(cat)}
                   />
 
                   <ScreenshotGrid
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     searchResults={searchResults}
                     searchQuery={searchQuery}
                     selectedCategory={selectedCategory}
@@ -1375,7 +1390,7 @@ function AppContent() {
                   isDark={isDark}
                 >
                   <SearchView
-                    screenshots={activeScreenshots}
+                    screenshots={accessibleScreenshots}
                     searchResults={searchResults}
                     query={searchQuery}
                     setQuery={setSearchQuery}

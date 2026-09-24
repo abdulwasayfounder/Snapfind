@@ -11,7 +11,7 @@ import {
   normalizeScreenshotItem,
   StorageManager,
 } from "./storage.ts";
-import { extractTextServerOCR, ocrWorkerManager } from "./ocr";
+import { extractTextServerOCR, extractTextClientOCR, ocrWorkerManager } from "./ocr";
 import { analyzeScreenshotImage } from "./api";
 import { determinePrimaryTitle, printPipelineDebuggingReport } from "./pipelineAudit";
 import { searchEngine } from "./searchEngine";
@@ -53,6 +53,14 @@ class ProcessingQueueService {
     this.initAndRecover();
     // Warm up OCR worker in background
     ocrWorkerManager.preloadWorker();
+
+    // Listen for online connectivity events to automatically resume offline queued jobs
+    if (typeof window !== "undefined") {
+      window.addEventListener("online", () => {
+        console.log("[ProcessingQueue] Connectivity restored. Automatically resuming waiting jobs...");
+        this.resumeWaitingForNetworkJobs();
+      });
+    }
   }
 
   /**
@@ -67,9 +75,17 @@ class ProcessingQueueService {
           // Recover any job that was interrupted mid-execution
           this.jobs = parsed.map((job) => {
             if (
+              job.status === "waiting_for_network" ||
+              job.status === "waiting_for_verification"
+            ) {
+              return job;
+            }
+            if (
               job.status !== "Completed" &&
               job.status !== "Failed" &&
-              job.status !== "Queued"
+              job.status !== "Queued" &&
+              job.status !== "completed" &&
+              job.status !== "failed"
             ) {
               // Interrupted mid-process: reset to Queued for automatic retry/completion
               return {
@@ -91,6 +107,9 @@ class ProcessingQueueService {
     // Auto start queue if pending items exist
     setTimeout(() => {
       this.processNextInQueue();
+      if (typeof navigator !== "undefined" && navigator.onLine) {
+        this.resumeWaitingForNetworkJobs();
+      }
     }, 500);
   }
 
@@ -445,9 +464,10 @@ class ProcessingQueueService {
     let rawAiPrivacyLevel: any = undefined;
     let rawAiSensitiveCategories: string[] = [];
     let aiSucceeded = false;
+    const isOffline = typeof navigator !== "undefined" && !navigator.onLine;
 
-    // Single consolidated high-speed AI call: extracts OCR + all metadata simultaneously
-    if (optimizedBase64 && optimizedBase64.startsWith("data:image")) {
+    // Single consolidated high-speed AI call: extracts OCR + all metadata simultaneously (when online)
+    if (!isOffline && optimizedBase64 && optimizedBase64.startsWith("data:image")) {
       try {
         const aiRes = await analyzeScreenshotImage(optimizedBase64, job.fileName);
         if (aiRes.success && aiRes.analysis) {
@@ -473,14 +493,19 @@ class ProcessingQueueService {
       }
     }
 
-    // Fast OCR fallback if AI was unavailable or produced empty OCR text
+    // Fast OCR: use client-side persistent Tesseract OCR when offline or server OCR when online
     if (!ocrText && optimizedBase64 && optimizedBase64.startsWith("data:image")) {
       this.updateJobState(job, "OCR Processing", 65);
       try {
-        const ocrRes = await extractTextServerOCR(optimizedBase64, job.fileName);
-        ocrText = (ocrRes.text || ocrRes.ocrText || "").trim();
+        if (isOffline) {
+          const clientOcr = await extractTextClientOCR(optimizedBase64);
+          ocrText = (clientOcr.text || clientOcr.ocrText || "").trim();
+        } else {
+          const ocrRes = await extractTextServerOCR(optimizedBase64, job.fileName);
+          ocrText = (ocrRes.text || ocrRes.ocrText || "").trim();
+        }
       } catch (e) {
-        console.warn("[ProcessingQueue] Server OCR fallback failed:", e);
+        console.warn("[ProcessingQueue] OCR fallback failed:", e);
       }
     }
 
@@ -650,8 +675,9 @@ class ProcessingQueueService {
       indexed_at: nowIso,
       isScreenshot: true,
       is_screenshot: true,
-      processingStatus: finalProcessingStatus as any,
-      processing_status: finalProcessingStatus as any,
+      processingStatus: isOffline ? ("waiting_for_network" as any) : (finalProcessingStatus as any),
+      processing_status: isOffline ? ("waiting_for_network" as any) : (finalProcessingStatus as any),
+      cloudSyncStatus: isOffline ? "pending" : "synced",
       processingTimestamp: nowIso,
       processing_timestamp: nowIso,
       content_hash: imgHash,
@@ -718,12 +744,19 @@ class ProcessingQueueService {
     searchEngine.updateItem(updatedItem);
     await yieldToMainThread(5);
 
-    // Finalize Step: Completed & Free Memory
-    job.status = "Completed";
-    job.progressPercent = 100;
-    job.completedAt = nowIso;
-    // Release base64 binary buffer to keep browser memory lightweight
-    job.base64Data = undefined;
+    // Finalize Step: Completed (or waiting_for_network if offline) & Free Memory
+    if (isOffline) {
+      job.status = "waiting_for_network";
+      job.progressPercent = 100;
+      job.completedAt = nowIso;
+      job.errorMessage = "Waiting for Internet";
+      job.base64Data = undefined;
+    } else {
+      job.status = "Completed";
+      job.progressPercent = 100;
+      job.completedAt = nowIso;
+      job.base64Data = undefined;
+    }
 
     // Dispatch global event for App and views to receive real-time completed screenshot
     if (typeof window !== "undefined") {
@@ -733,6 +766,98 @@ class ProcessingQueueService {
         })
       );
     }
+  }
+
+  /**
+   * Automatically resume offline jobs when network connectivity returns
+   * Enriches metadata via cloud AI without repeating successful local OCR
+   */
+  public async resumeWaitingForNetworkJobs(): Promise<void> {
+    const waitingJobs = this.jobs.filter(
+      (j) => j.status === "waiting_for_network" || j.status === "waiting_for_verification"
+    );
+    if (waitingJobs.length === 0) return;
+
+    console.log(`[ProcessingQueue] Resuming ${waitingJobs.length} offline jobs for cloud enrichment...`);
+
+    const stored = loadStoredScreenshots();
+    const quotaCheck = SubscriptionManager.canIndexScreenshot(stored.length);
+
+    for (const job of waitingJobs) {
+      if (typeof navigator !== "undefined" && !navigator.onLine) break;
+
+      if (!quotaCheck.allowed) {
+        job.status = "waiting_for_verification";
+        job.errorMessage = "Waiting for account verification";
+        continue;
+      }
+
+      try {
+        this.updateJobState(job, "AI Analysis", 50);
+        let rawSource = job.base64Data || job.imageUri;
+        if (!rawSource || !rawSource.startsWith("data:image")) {
+          rawSource = job.imageUri;
+        }
+
+        const optResult = await optimizeImageForPipeline(rawSource, {
+          maxDimension: 1600,
+          quality: 0.88,
+          thumbnailMax: 320,
+          thumbnailQuality: 0.78,
+        });
+        const optimizedBase64 = optResult.optimizedBase64 || rawSource;
+
+        if (optimizedBase64 && optimizedBase64.startsWith("data:image")) {
+          const aiRes = await analyzeScreenshotImage(optimizedBase64, job.fileName);
+          if (aiRes.success && aiRes.analysis) {
+            const analysis = aiRes.analysis;
+            const existingItem = stored.find((s) => s.id === job.imageId);
+            if (existingItem) {
+              const enrichedItem: ScreenshotItem = normalizeScreenshotItem({
+                ...existingItem,
+                title: determinePrimaryTitle(analysis.title, existingItem.fullText || job.ocrText, job.fileName, analysis.summary),
+                summary: analysis.summary || existingItem.summary,
+                description: analysis.description || analysis.summary || existingItem.description,
+                ai_description: analysis.description || analysis.summary || existingItem.ai_description,
+                category: (analysis.category as CategoryType) || existingItem.category,
+                tags: Array.from(new Set([...(existingItem.tags || []), ...(analysis.tags || [])])),
+                keywords: Array.from(new Set([...(existingItem.keywords || []), ...(analysis.keywords || [])])),
+                keyEntities: Array.from(new Set([...(existingItem.keyEntities || []), ...(analysis.keyEntities || [])])),
+                objects: Array.from(new Set([...(existingItem.objects || []), ...(analysis.objects || [])])),
+                collectionName: analysis.collectionName || existingItem.collectionName,
+                processingStatus: "Completed",
+                processing_status: "Completed",
+                cloudSyncStatus: "synced",
+                dateModified: new Date().toISOString(),
+                date_modified: new Date().toISOString(),
+              });
+
+              saveStoredScreenshotsBatch([enrichedItem]);
+              searchEngine.updateItem(enrichedItem);
+
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(
+                  new CustomEvent("snapfind_screenshot_processed", {
+                    detail: { screenshot: enrichedItem, jobId: job.id },
+                  })
+                );
+              }
+            }
+          }
+        }
+
+        job.status = "Completed";
+        job.progressPercent = 100;
+        job.completedAt = new Date().toISOString();
+        job.errorMessage = undefined;
+        job.base64Data = undefined;
+      } catch (err: any) {
+        console.warn(`[ProcessingQueue] Failed resuming job ${job.id}:`, err);
+      }
+    }
+
+    this.persistQueue();
+    this.notifyListeners();
   }
 
   /**
