@@ -460,9 +460,13 @@ class GameServiceClass {
     this.leaderboardListeners.add(callback);
 
     // Initial load
-    this.getLeaderboard(user).then((res) => {
-      callback(res.leaderboard, res.userRank);
-    });
+    this.getLeaderboard(user)
+      .then((res) => {
+        callback(res.leaderboard, res.userRank);
+      })
+      .catch((err) => {
+        console.warn("[GameService] Initial leaderboard error:", err);
+      });
 
     // Realtime Supabase Channel if configured
     if (isSupabaseConfigured && !this.realtimeChannel) {
@@ -473,9 +477,13 @@ class GameServiceClass {
             "postgres_changes",
             { event: "*", schema: "public", table: "game_profiles" },
             () => {
-              this.getLeaderboard(user).then((res) => {
-                this.notifyListeners(res.leaderboard, res.userRank);
-              });
+              this.getLeaderboard(user)
+                .then((res) => {
+                  this.notifyListeners(res.leaderboard, res.userRank);
+                })
+                .catch((err) => {
+                  console.warn("[GameService] Realtime leaderboard update error:", err);
+                });
             }
           )
           .subscribe();
@@ -486,9 +494,13 @@ class GameServiceClass {
 
     // Polling interval fallback for development / local testing (every 8 seconds)
     const interval = setInterval(() => {
-      this.getLeaderboard(user).then((res) => {
-        callback(res.leaderboard, res.userRank);
-      });
+      this.getLeaderboard(user)
+        .then((res) => {
+          callback(res.leaderboard, res.userRank);
+        })
+        .catch((err) => {
+          console.warn("[GameService] Polling leaderboard error:", err);
+        });
     }, 8000);
 
     return () => {

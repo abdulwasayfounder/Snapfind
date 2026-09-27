@@ -50,9 +50,10 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
         <div className="relative max-w-3xl mx-auto space-y-8">
           {/* Big App Name & Logo Badge */}
           <div className="flex flex-col items-center justify-center gap-4">
-            <h2 className="text-4xl sm:text-6xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-indigo-200 to-cyan-300 bg-clip-text text-transparent uppercase drop-shadow-lg">
+            <h1 className="text-4xl sm:text-6xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-indigo-200 to-cyan-300 bg-clip-text text-transparent uppercase drop-shadow-lg">
+              <span className="sr-only">SnapFind AI – AI Screenshot Search: </span>
               SNAP FIND
-            </h2>
+            </h1>
 
             {/* Interactive 3D AI Neural Animation */}
             <div className="w-full max-w-lg my-2">
@@ -72,12 +73,12 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
           </div>
 
           {/* Main Emotional Headline */}
-          <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-100 leading-[1.15]">
+          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-100 leading-[1.15]">
             Stop Scrolling. <br />
             <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-300 bg-clip-text text-transparent">
               Find Any Screenshot in Seconds.
             </span>
-          </h1>
+          </h2>
 
           {/* Emotional Subheadline */}
           <p className="text-sm sm:text-lg text-slate-300/90 max-w-2xl mx-auto leading-relaxed font-normal">

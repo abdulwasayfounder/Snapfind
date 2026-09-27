@@ -6,10 +6,56 @@
     <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="shortcut icon" type="image/svg+xml" href="/logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Screenshot indexer and natural language search engine using Gemini Vision OCR." />
-    <meta property="og:title" content="SnapFind" />
-    <meta property="og:description" content="Screenshot indexer and natural language search engine using Gemini Vision OCR." />
-    <title>SnapFind - Screenshot indexer and natural language search engine</title>
+    <title>SnapFind AI – AI Screenshot Search</title>
+    <meta name="description" content="Search, organize and protect your screenshots with SnapFind AI." />
+    <meta name="robots" id="sf-robots" content="index, follow" />
+    <link rel="canonical" id="sf-canonical" href="https://ais-pre-2ztufua4tcuizbkzpm5xi4-438233974581.asia-east1.run.app/" />
+
+    <!-- Open Graph Metadata -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SnapFind AI" />
+    <meta property="og:title" content="SnapFind AI – AI Screenshot Search" />
+    <meta property="og:description" content="Search, organize and protect your screenshots with SnapFind AI." />
+    <meta property="og:url" content="https://ais-pre-2ztufua4tcuizbkzpm5xi4-438233974581.asia-east1.run.app/" />
+    <meta property="og:image" content="/logo.png" />
+
+    <!-- Twitter Card Metadata -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="SnapFind AI – AI Screenshot Search" />
+    <meta name="twitter:description" content="Search, organize and protect your screenshots with SnapFind AI." />
+    <meta name="twitter:image" content="/logo.png" />
+
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- SoftwareApplication Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SnapFind AI",
+      "applicationCategory": "ProductivityApplication",
+      "operatingSystem": "Web, Android, iOS",
+      "description": "Search, organize and protect your screenshots with SnapFind AI.",
+      "url": "https://ais-pre-2ztufua4tcuizbkzpm5xi4-438233974581.asia-east1.run.app/",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free plan includes 100 screenshots indexed locally with natural language search."
+      },
+      "featureList": [
+        "AI Screenshot Search",
+        "Gemini Vision OCR and indexation",
+        "Private offline-capable storage",
+        "Smart automatic categorization",
+        "Encrypted Vault and private collections"
+      ]
+    }
+    </script>
   </head>
   <body style="margin: 0; background-color: #07090D; color: #F8FAFC; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
     <div id="root">
@@ -70,19 +116,14 @@
 
         window.addEventListener('error', function(e) {
           if (!hasMounted) {
-            console.error('[StartupError]', e.message || e);
-            showStartupError(e.message || 'Script error occurred during startup');
+            console.warn('[StartupLoadWarning]', e.message || e);
           }
         });
 
         window.addEventListener('unhandledrejection', function(e) {
-          if (!hasMounted) {
-            console.error('[StartupUnhandledRejection]', e.reason);
-            var reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled rejection';
-            // Do not show full modal for offline network failures
-            if (reason.indexOf('Failed to fetch') === -1 && reason.indexOf('NetworkError') === -1) {
-              showStartupError(reason);
-            }
+          // Non-blocking warning for unhandled rejections to prevent crashing startup UI
+          if (e && e.reason) {
+            console.warn('[UnhandledRejectionWarning]', e.reason.message || e.reason);
           }
         });
       })();

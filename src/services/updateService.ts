@@ -188,9 +188,13 @@ class UpdateServiceEngine {
           this.isDownloading = false;
         }
         this.notify();
-      }).then((handle) => {
-        this.progressSubscription = handle;
-      });
+      })
+        .then((handle) => {
+          this.progressSubscription = handle;
+        })
+        .catch((e) => {
+          console.warn("[UpdateService] Progress listener promise rejected:", e);
+        });
     } catch (e) {
       console.warn("[UpdateService] Progress listener could not be registered:", e);
     }
@@ -422,16 +426,24 @@ class UpdateServiceEngine {
    * Called on app startup or foreground resume
    */
   public async checkOnStartup(): Promise<void> {
-    await this.initPlatformInfo();
-    // Non-manual background check respects cooldown & settings
-    await this.checkForUpdates(false);
+    try {
+      await this.initPlatformInfo();
+      // Non-manual background check respects cooldown & settings
+      await this.checkForUpdates(false);
+    } catch (err) {
+      console.warn("[UpdateService] checkOnStartup warning:", err);
+    }
   }
 
   public async checkOnResume(): Promise<void> {
-    // Check if cooldown elapsed
-    const now = Date.now();
-    if (!this.state.lastCheckedAt || now - this.state.lastCheckedAt >= CHECK_COOLDOWN_MS) {
-      await this.checkForUpdates(false);
+    try {
+      // Check if cooldown elapsed
+      const now = Date.now();
+      if (!this.state.lastCheckedAt || now - this.state.lastCheckedAt >= CHECK_COOLDOWN_MS) {
+        await this.checkForUpdates(false);
+      }
+    } catch (err) {
+      console.warn("[UpdateService] checkOnResume warning:", err);
     }
   }
 

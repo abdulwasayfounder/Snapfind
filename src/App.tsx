@@ -84,6 +84,7 @@ import { NotificationService } from "./services/notificationService";
 import { UpdateService, UpdateState } from "./services/updateService";
 import { UpdateModal } from "./components/update/UpdateModal";
 import { WhatsNewModal } from "./components/update/WhatsNewModal";
+import { applySeoMetadata } from "./services/seoManager";
 
 function AppContent() {
   const { user: authUser, signOut, isRecoveryMode } = useAuth();
@@ -148,6 +149,11 @@ function AppContent() {
 
   // Global Route-change scroll reset (resets scroll to top (0,0) on every route/page change)
   useRouteScrollReset(activeView, mainContentRef);
+
+  // Dynamic SEO metadata & robots noindex/index synchronization
+  useEffect(() => {
+    applySeoMetadata(activeView);
+  }, [activeView]);
 
   // Keep browser history and URL hash synchronized for back/forward navigation
   useEffect(() => {
@@ -236,7 +242,9 @@ function AppContent() {
     }
 
     // 2. Perform startup update check (respects 4h cooldown & autoCheckUpdates setting)
-    UpdateService.checkOnStartup();
+    UpdateService.checkOnStartup().catch((err) => {
+      console.warn("[App] checkOnStartup warning:", err);
+    });
 
     // 3. Subscribe to update changes
     const unsub = UpdateService.subscribe((state) => {
@@ -428,16 +436,28 @@ function AppContent() {
 
   // Initialize Production Storage Provider (IndexedDB / SQLite) & Automatic localStorage Migration
   useEffect(() => {
-    initializeStorage().then(() => {
-      const stored = loadStoredScreenshots();
-      setScreenshots(stored);
-      searchEngine.updateIndex(stored);
-      setSettings(loadSettings());
-      setSearchHistory(loadSearchHistory());
-      setUserProfile(loadUserProfile());
-      nativeMediaScanner.initialize();
-      setIsStorageReady(true);
-    });
+    if (typeof (window as any).__SNAPFIND_MOUNTED__ === "function") {
+      (window as any).__SNAPFIND_MOUNTED__();
+    }
+    initializeStorage()
+      .then(() => {
+        const stored = loadStoredScreenshots();
+        setScreenshots(stored);
+        searchEngine.updateIndex(stored);
+        setSettings(loadSettings());
+        setSearchHistory(loadSearchHistory());
+        setUserProfile(loadUserProfile());
+        nativeMediaScanner.initialize().catch((scannerErr) => {
+          console.warn("[App] nativeMediaScanner.initialize warning:", scannerErr);
+        });
+        setIsStorageReady(true);
+      })
+      .catch((storageErr) => {
+        console.warn("[App] initializeStorage fallback:", storageErr);
+        const stored = loadStoredScreenshots();
+        setScreenshots(stored);
+        setIsStorageReady(true);
+      });
   }, []);
 
   // Listen for real-time background OCR / AI processing completions & failures
@@ -466,18 +486,22 @@ function AppContent() {
     if (!isStorageReady) return;
     if (authUser?.id && authUser.id !== "guest") {
       console.log(`[App] Auth user logged in (${authUser.id}), restoring remote & local screenshots...`);
-      SyncEngine.restoreUserDataOnLogin(authUser.id).then((restored) => {
-        if (restored.screenshots) {
-          setScreenshots(restored.screenshots);
-          searchEngine.updateIndex(restored.screenshots);
-        }
-        if (restored.settings) {
-          setSettings(restored.settings);
-        }
-        if (restored.history) {
-          setSearchHistory(restored.history);
-        }
-      });
+      SyncEngine.restoreUserDataOnLogin(authUser.id)
+        .then((restored) => {
+          if (restored.screenshots) {
+            setScreenshots(restored.screenshots);
+            searchEngine.updateIndex(restored.screenshots);
+          }
+          if (restored.settings) {
+            setSettings(restored.settings);
+          }
+          if (restored.history) {
+            setSearchHistory(restored.history);
+          }
+        })
+        .catch((syncErr) => {
+          console.warn("[App] restoreUserDataOnLogin warning:", syncErr);
+        });
     } else {
       SyncEngine.setCurrentUserId("guest");
       clearUserSessionData();

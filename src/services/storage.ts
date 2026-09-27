@@ -287,24 +287,30 @@ let cachedUserProfile: UserProfile | null = null;
 let cachedNotifications: AppNotification[] | null = null;
 
 export async function initializeStorage(): Promise<void> {
-  await StorageManager.initialize();
-  const provider = StorageManager.getProvider();
+  try {
+    await StorageManager.initialize();
+    const provider = StorageManager.getProvider();
 
-  cachedScreenshots = await provider.getAllScreenshots();
-  if (!cachedScreenshots || cachedScreenshots.length === 0) {
-    const samples = INITIAL_SAMPLE_SCREENSHOTS.map(normalizeScreenshotItem);
-    if (provider.saveAllScreenshots) {
-      await provider.saveAllScreenshots(samples);
+    cachedScreenshots = await provider.getAllScreenshots();
+    if (!cachedScreenshots || cachedScreenshots.length === 0) {
+      const samples = INITIAL_SAMPLE_SCREENSHOTS.map(normalizeScreenshotItem);
+      if (provider.saveAllScreenshots) {
+        await provider.saveAllScreenshots(samples);
+      }
+      cachedScreenshots = samples;
     }
-    cachedScreenshots = samples;
-  }
 
-  cachedSettings = await provider.loadSettings();
-  if (provider.loadSearchHistory) {
-    cachedSearchHistory = await provider.loadSearchHistory();
-  }
-  if (provider.loadUserProfile) {
-    cachedUserProfile = await provider.loadUserProfile();
+    cachedSettings = await provider.loadSettings();
+    if (provider.loadSearchHistory) {
+      cachedSearchHistory = await provider.loadSearchHistory();
+    }
+    if (provider.loadUserProfile) {
+      cachedUserProfile = await provider.loadUserProfile();
+    }
+  } catch (err) {
+    console.warn("[Storage] Error during initializeStorage, falling back to localStorage:", err);
+    cachedScreenshots = loadStoredScreenshots();
+    cachedSettings = loadSettings();
   }
 }
 

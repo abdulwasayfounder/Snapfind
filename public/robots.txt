@@ -1,0 +1,34 @@
+# SnapFind AI robots.txt
+# Public pages allowed for indexing; private dashboard/user routes blocked.
+
+User-agent: *
+Allow: /$
+Allow: /#landing
+Allow: /#pricing
+Allow: /#founders
+Allow: /#game
+Allow: /#snapdash
+Allow: /logo.png
+Allow: /logo.svg
+Allow: /favicon.ico
+
+# Disallow private user data, vault, collections, and API endpoints
+Disallow: /api/
+Disallow: /#dashboard
+Disallow: /#collections
+Disallow: /#timeline
+Disallow: /#favorites
+Disallow: /#trash
+Disallow: /#gallery
+Disallow: /#search
+Disallow: /#import
+Disallow: /#history
+Disallow: /#settings
+Disallow: /#account
+Disallow: /#notifications
+Disallow: /#feedback
+Disallow: /#admin
+Disallow: /#admin/payments
+Disallow: /admin-payments
+
+Sitemap: https://ais-pre-2ztufua4tcuizbkzpm5xi4-438233974581.asia-east1.run.app/sitemap.xml

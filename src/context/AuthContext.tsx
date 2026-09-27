@@ -146,17 +146,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     processAuthCallback();
 
     // 2. Fetch current active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setSupabaseUser(session?.user ?? null);
-      if (session?.user) {
-        syncProfile(session.user);
-        SyncEngine.setCurrentUserId(session.user.id);
-      } else {
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setSupabaseUser(session?.user ?? null);
+        if (session?.user) {
+          syncProfile(session.user);
+          SyncEngine.setCurrentUserId(session.user.id);
+        } else {
+          SyncEngine.setCurrentUserId("guest");
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.warn("[AuthContext] getSession warning:", err);
         SyncEngine.setCurrentUserId("guest");
-      }
-      setLoading(false);
-    });
+        setLoading(false);
+      });
 
     // 3. Listen to persistent Auth changes
     const {

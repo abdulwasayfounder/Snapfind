@@ -49,8 +49,8 @@ export class IndexedDBStorageProvider implements StorageProvider {
       };
 
       request.onerror = () => {
-        console.error("IndexedDB failed to open:", request.error);
-        reject(request.error);
+        console.warn("IndexedDB failed to open, falling back to local storage:", request.error);
+        resolve();
       };
     });
 
