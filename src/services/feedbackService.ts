@@ -1,10 +1,11 @@
 import { FeedbackItem, FeedbackSubmitPayload, FeedbackType, UserProfile } from "../types";
 import { supabase, isSupabaseConfigured } from "./supabase";
 import { NotificationService } from "./notificationService";
+import { APP_VERSION_NAME } from "../config/version";
 
 const STORAGE_PREFIX = "snapfind_feedback_user_";
 const FOUNDER_DISMISSED_KEY = "snapfind_founder_feedback_prompt_dismissed_v1";
-const APP_VERSION = "v2.4.0";
+const APP_VERSION = APP_VERSION_NAME;
 
 type FeedbackListener = (feedbackList: FeedbackItem[]) => void;
 

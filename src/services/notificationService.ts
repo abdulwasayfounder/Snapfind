@@ -4,6 +4,7 @@ import {
   NotificationPriority,
   ScreenshotItem,
 } from "../types";
+import { APP_VERSION_NAME } from "../config/version";
 import {
   loadNotifications,
   saveNotifications,
@@ -1090,7 +1091,7 @@ class NotificationServiceEngine {
     return null;
   }
 
-  public notifyAppUpdated(version: string = "v2.4"): AppNotification | null {
+  public notifyAppUpdated(version: string = APP_VERSION_NAME): AppNotification | null {
     return this.pushNotification(
       "IMPORTANT",
       "SnapFind AI updated",
@@ -1098,6 +1099,24 @@ class NotificationServiceEngine {
       {
         priority: "medium",
         metadata: { version },
+      }
+    );
+  }
+
+  public notifyUpdateAvailable(version: string, releaseNotes?: string, downloadUrl?: string): AppNotification | null {
+    return this.pushNotification(
+      "IMPORTANT",
+      "SnapFind update available",
+      `A new release (${version}) is available with faster indexing and enhancements.`,
+      {
+        id: `update_available_${version.replace(/^v/i, "")}`,
+        priority: "medium",
+        metadata: {
+          isAppUpdate: true,
+          version,
+          releaseNotes,
+          downloadUrl,
+        },
       }
     );
   }

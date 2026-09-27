@@ -2,21 +2,93 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="shortcut icon" type="image/svg+xml" href="/logo.svg" />
+    <link rel="icon" type="image/svg+xml" href="./logo.svg" />
+    <link rel="icon" type="image/png" href="./logo.png" />
+    <link rel="shortcut icon" type="image/svg+xml" href="./logo.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Screenshot indexer and natural language search engine using Gemini Vision OCR." />
     <meta property="og:title" content="SnapFind" />
     <meta property="og:description" content="Screenshot indexer and natural language search engine using Gemini Vision OCR." />
     <title>SnapFind - Screenshot indexer and natural language search engine</title>
-    <!-- Paddle Billing v2 CDN -->
-    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
-    <script type="module" crossorigin src="/assets/index-DwfAdPZl.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BfIulgKU.css">
+    <script type="module" crossorigin src="./assets/index-CU5c93tE.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-BRTUtAy6.css">
   </head>
-  <body>
-    <div id="root"></div>
+  <body style="margin: 0; background-color: #07090D; color: #F8FAFC; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <div id="root">
+      <!-- Safe Pre-React Brand Splash Loader (replaces blank white screen on startup) -->
+      <div id="sf-startup-loader" style="min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: #07090D; padding: 24px; box-sizing: border-box; text-align: center;">
+        <div style="position: relative; margin-bottom: 24px;">
+          <div style="width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, #121821, #0D1117); border: 1px solid #1E293B; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#CCFF00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"></path>
+              <circle cx="12" cy="13" r="3"></circle>
+            </svg>
+          </div>
+          <div style="position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; background-color: #00FF66; border: 2px solid #07090D;"></div>
+        </div>
+        <h1 style="margin: 0 0 8px 0; font-size: 20px; font-weight: 800; letter-spacing: 0.05em; color: #F8FAFC;">SNAPFIND AI</h1>
+        <p style="margin: 0 0 24px 0; font-size: 12px; color: #94A3B8; letter-spacing: 0.02em;">Loading visual memory engine...</p>
+        <div style="width: 140px; height: 3px; background-color: #1E293B; border-radius: 9999px; overflow: hidden; position: relative;">
+          <div style="width: 50%; height: 100%; background: linear-gradient(90deg, #CCFF00, #00FF66); border-radius: 9999px; animation: sf-indeterminate 1.5s infinite ease-in-out;"></div>
+        </div>
+        <style>
+          @keyframes sf-indeterminate {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(250%); }
+          }
+        </style>
+      </div>
+    </div>
+
+    <!-- Diagnostic and Safe Startup Error Screen Handler -->
+    <script>
+      (function() {
+        var hasMounted = false;
+        window.__SNAPFIND_MOUNTED__ = function() {
+          hasMounted = true;
+        };
+
+        function showStartupError(msg) {
+          if (hasMounted) return;
+          var root = document.getElementById('root');
+          if (!root) return;
+          root.innerHTML = [
+            '<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #07090D; color: #F8FAFC; padding: 20px; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box;">',
+            '  <div style="max-width: 420px; width: 100%; background-color: #0D1117; border: 1px solid #1E293B; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.6);">',
+            '    <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(255, 102, 0, 0.15); color: #FF6600; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; font-size: 24px;">⚠</div>',
+            '    <h2 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #F8FAFC;">Initialization Notice</h2>',
+            '    <p style="margin: 0 0 16px 0; font-size: 13px; color: #94A3B8; line-height: 1.5;">SnapFind encountered a temporary startup issue. You can restart or reset local cache to continue.</p>',
+            '    <div style="background-color: #07090D; border: 1px solid #1E293B; border-radius: 10px; padding: 10px; margin-bottom: 20px; text-align: left; font-family: monospace; font-size: 11px; color: #FF6600; max-height: 80px; overflow-y: auto; word-break: break-all;">',
+            msg || 'Unknown startup error',
+            '    </div>',
+            '    <div style="display: flex; gap: 10px; justify-content: center;">',
+            '      <button onclick="window.location.reload()" style="flex: 1; padding: 12px 16px; border-radius: 12px; background: #CCFF00; color: #07090D; font-weight: 700; font-size: 13px; border: none; cursor: pointer;">Reload App</button>',
+            '      <button onclick="localStorage.clear(); sessionStorage.clear(); window.location.reload();" style="flex: 1; padding: 12px 16px; border-radius: 12px; background: #121821; color: #94A3B8; font-weight: 600; font-size: 13px; border: 1px solid #1E293B; cursor: pointer;">Reset Cache</button>',
+            '    </div>',
+            '  </div>',
+            '</div>'
+          ].join('');
+        }
+
+        window.addEventListener('error', function(e) {
+          if (!hasMounted) {
+            console.error('[StartupError]', e.message || e);
+            showStartupError(e.message || 'Script error occurred during startup');
+          }
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+          if (!hasMounted) {
+            console.error('[StartupUnhandledRejection]', e.reason);
+            var reason = e.reason ? (e.reason.message || String(e.reason)) : 'Unhandled rejection';
+            // Do not show full modal for offline network failures
+            if (reason.indexOf('Failed to fetch') === -1 && reason.indexOf('NetworkError') === -1) {
+              showStartupError(reason);
+            }
+          }
+        });
+      })();
+    </script>
   </body>
 </html>
 

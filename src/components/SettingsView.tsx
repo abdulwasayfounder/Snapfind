@@ -56,6 +56,9 @@ import { AccountPageView } from "./AccountPageView";
 import { FeedbackView } from "./FeedbackView";
 import { YourUsageCard } from "./subscription/YourUsageCard";
 import { PageHeroHeader } from "./PageHeroHeader";
+import { APP_VERSION, APP_VERSION_CODE, APP_VERSION_NAME, isNewerVersion } from "../config/version";
+import { UpdateService, UpdateState } from "../services/updateService";
+import { UpdateModal } from "./update/UpdateModal";
 
 export type SettingsSectionId =
   | "general"
@@ -122,6 +125,29 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
   // Copy success indicator
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  // App Update State
+  const [updateState, setUpdateState] = useState<UpdateState>(() => UpdateService.getState());
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+
+  useEffect(() => {
+    return UpdateService.subscribe((state) => {
+      setUpdateState(state);
+    });
+  }, []);
+
+  const handleManualCheckUpdates = async () => {
+    setIsCheckingUpdates(true);
+    try {
+      const release = await UpdateService.checkForUpdates(true);
+      if (release && isNewerVersion(release.version, updateState.currentVersion)) {
+        setShowUpdateModal(true);
+      }
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  };
 
   useEffect(() => {
     return SyncEngine.subscribe((state) => {
@@ -259,10 +285,10 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
     {
       id: "about",
       label: "About",
-      description: "Version, system status & build metadata",
+      description: "Version, updates, system status & build metadata",
       icon: <Info className="w-4 h-4" />,
       color: "text-slate-400 bg-slate-500/10 border-slate-500/20",
-      badge: "v2.4",
+      badge: APP_VERSION_NAME,
     },
   ];
 
@@ -878,9 +904,118 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 />
               )}
 
-              {/* SECTION 10: ABOUT */}
+              {/* SECTION 10: ABOUT & APP UPDATES */}
               {activeSection === "about" && (
                 <div className="space-y-5">
+                  {/* APP UPDATES CARD */}
+                  <SectionCard
+                    isDark={isDark}
+                    icon={<Download className="w-5 h-5 text-[#CCFF00]" />}
+                    title="App Updates"
+                    description="Official GitHub Release updates, version management & integrity."
+                  >
+                    <div className="space-y-4 text-xs">
+                      {/* Version info & Check Button */}
+                      <div className="p-4 rounded-2xl bg-[#0D1117] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                          <div className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">App Version</div>
+                          <div className="text-base font-black text-white flex items-center gap-2">
+                            <span>Current version: {APP_VERSION_NAME}</span>
+                            <span className="text-[11px] px-2 py-0.5 rounded-md bg-white/10 text-[#CCFF00] font-mono font-bold">
+                              Build {APP_VERSION_CODE}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 flex items-center gap-1.5 pt-0.5">
+                            <Clock className="w-3.5 h-3.5 text-slate-500" />
+                            <span>
+                              Last checked:{" "}
+                              {updateState.lastCheckedAt
+                                ? new Date(updateState.lastCheckedAt).toLocaleString(undefined, {
+                                    month: "short",
+                                    day: "numeric",
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  })
+                                : "Not checked yet"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2.5">
+                          <button
+                            onClick={handleManualCheckUpdates}
+                            disabled={isCheckingUpdates}
+                            className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 active:scale-95 text-white font-bold text-xs flex items-center gap-2 cursor-pointer transition-all disabled:opacity-50"
+                          >
+                            <RefreshCw className={`w-3.5 h-3.5 ${isCheckingUpdates ? "animate-spin text-[#CCFF00]" : ""}`} />
+                            <span>{isCheckingUpdates ? "Checking..." : "Check for Updates"}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Available Update Prompt */}
+                      {updateState.status === "available" && updateState.latestRelease && (
+                        <div className="p-4 rounded-2xl bg-gradient-to-br from-[#CCFF00]/10 via-[#00FF66]/10 to-transparent border border-[#CCFF00]/30 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-[#CCFF00]">
+                                🚀 New SnapFind update available
+                              </div>
+                              <div className="text-sm font-black text-white mt-0.5">
+                                Version: {updateState.latestRelease.versionName}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => setShowUpdateModal(true)}
+                              className="px-4 py-2 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-[#07090D] font-extrabold text-xs flex items-center gap-1.5 shadow-md shadow-[#CCFF00]/20 cursor-pointer transition-all"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Update Now</span>
+                            </button>
+                          </div>
+
+                          <div className="space-y-1 pt-1 text-slate-300 text-xs">
+                            <div className="text-[11px] font-semibold text-slate-400">Changes:</div>
+                            {updateState.latestRelease.bulletChanges.map((change, idx) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <span className="text-[#00FF66] font-bold">•</span>
+                                <span>{change}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Up to date feedback if just checked and no update */}
+                      {updateState.status === "up_to_date" && (
+                        <div className="p-3.5 rounded-2xl bg-[#00FF66]/10 border border-[#00FF66]/20 text-[#00FF66] text-xs flex items-center gap-2.5">
+                          <CheckCircle2 className="w-4 h-4 shrink-0" />
+                          <span>You're on the latest official version of SnapFind AI ({APP_VERSION_NAME}).</span>
+                        </div>
+                      )}
+
+                      {/* Error Feedback */}
+                      {updateState.status === "error" && updateState.errorMessage && (
+                        <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5">
+                          <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                          <div className="space-y-1">
+                            <div className="font-semibold">{updateState.errorMessage}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Automatic update checks toggle */}
+                      <ToggleRow
+                        title="Automatic update checks"
+                        description="Check for new releases on startup and background resume (no Google Play required)"
+                        checked={settings.autoCheckUpdates !== false}
+                        onChange={(v) => onUpdateSettings({ autoCheckUpdates: v })}
+                        isDark={isDark}
+                      />
+                    </div>
+                  </SectionCard>
+
+                  {/* ABOUT ARCHITECTURE CARD */}
                   <SectionCard
                     isDark={isDark}
                     icon={<Info className="w-5 h-5 text-blue-400" />}
@@ -892,7 +1027,9 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
                           <span className="text-[11px] text-slate-400">Release Version</span>
-                          <div className="text-base font-extrabold text-blue-400 mt-0.5">v2.4.0 (Enterprise)</div>
+                          <div className="text-base font-extrabold text-[#CCFF00] mt-0.5">
+                            {APP_VERSION_NAME}
+                          </div>
                         </div>
                         <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10">
                           <span className="text-[11px] text-slate-400">AI Core Engine</span>
@@ -919,8 +1056,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                           <span className="text-teal-400 font-bold">Supabase Realtime v2</span>
                         </div>
                         <div className="flex items-center justify-between text-slate-300">
-                          <span className="text-slate-400">Build Timestamp:</span>
-                          <span className="text-slate-400">2026-08-15 01:48:25</span>
+                          <span className="text-slate-400">Application ID:</span>
+                          <span className="text-slate-400 font-mono">com.snapfind.ai</span>
                         </div>
                       </div>
 
@@ -1014,6 +1151,14 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* App Update Dialog */}
+      <UpdateModal
+        isOpen={showUpdateModal}
+        onClose={() => setShowUpdateModal(false)}
+        updateState={updateState}
+        isDark={isDark}
+      />
     </div>
   );
 };

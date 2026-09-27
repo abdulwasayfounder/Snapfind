@@ -81,6 +81,9 @@ import { SyncEngine } from "./services/syncEngine";
 import { searchEngine } from "./services/searchEngine";
 import { processingQueue } from "./services/processingQueue";
 import { NotificationService } from "./services/notificationService";
+import { UpdateService, UpdateState } from "./services/updateService";
+import { UpdateModal } from "./components/update/UpdateModal";
+import { WhatsNewModal } from "./components/update/WhatsNewModal";
 
 function AppContent() {
   const { user: authUser, signOut, isRecoveryMode } = useAuth();
@@ -216,6 +219,47 @@ function AppContent() {
   const [notifications, setNotifications] = useState<AppNotification[]>(() => NotificationService.getNotifications());
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
+  // Free App Update System State
+  const [updateState, setUpdateState] = useState<UpdateState>(() => UpdateService.getState());
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isWhatsNewOpen, setIsWhatsNewOpen] = useState(false);
+  const [whatsNewVersion, setWhatsNewVersion] = useState("");
+
+  useEffect(() => {
+    // 1. Check if first run after update
+    const firstRun = UpdateService.checkFirstRunAfterUpdate();
+    if (firstRun.wasUpdated) {
+      setWhatsNewVersion(firstRun.version);
+      setIsWhatsNewOpen(true);
+      NotificationService.notifyAppUpdated(firstRun.version);
+    }
+
+    // 2. Perform startup update check (respects 4h cooldown & autoCheckUpdates setting)
+    UpdateService.checkOnStartup();
+
+    // 3. Subscribe to update changes
+    const unsub = UpdateService.subscribe((state) => {
+      setUpdateState(state);
+      if (state.status === "available" && state.latestRelease) {
+        const dismissed = UpdateService.getDismissedVersion();
+        if (dismissed !== state.latestRelease.version) {
+          setIsUpdateModalOpen(true);
+        }
+      }
+    });
+
+    // 4. Custom event for opening update modal from notification click
+    const handleOpenUpdate = () => {
+      setIsUpdateModalOpen(true);
+    };
+    window.addEventListener("snapfind_open_update", handleOpenUpdate);
+
+    return () => {
+      unsub();
+      window.removeEventListener("snapfind_open_update", handleOpenUpdate);
+    };
+  }, []);
 
   const handleOpenFeedback = (pageContext?: string) => {
     setFeedbackPageContext(pageContext || activeView);
@@ -1699,6 +1743,21 @@ function AppContent() {
         isDark={isDark}
         onTriggerSync={() => SyncEngine.scheduleSync(0)}
         onCopyText={handleCopyText}
+      />
+
+      {/* Free App Update Dialog */}
+      <UpdateModal
+        isOpen={isUpdateModalOpen}
+        onClose={() => setIsUpdateModalOpen(false)}
+        updateState={updateState}
+        isDark={isDark}
+      />
+
+      {/* Post-Update What's New Dialog */}
+      <WhatsNewModal
+        isOpen={isWhatsNewOpen}
+        onClose={() => setIsWhatsNewOpen(false)}
+        version={whatsNewVersion}
       />
     </div>
   );

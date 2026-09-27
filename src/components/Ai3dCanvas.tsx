@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 interface Ai3dCanvasProps {
@@ -11,27 +11,35 @@ export const Ai3dCanvas: React.FC<Ai3dCanvasProps> = ({
   height = "h-64 sm:h-80",
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [webGlSupported, setWebGlSupported] = useState(true);
 
   useEffect(() => {
     const container = mountRef.current;
     if (!container) return;
 
-    const width = container.clientWidth;
-    const heightPx = container.clientHeight;
+    const width = container.clientWidth || 300;
+    const heightPx = container.clientHeight || 250;
 
-    // 1. Scene, Camera, Renderer
+    let renderer: THREE.WebGLRenderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+      });
+      renderer.setSize(width, heightPx);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+    } catch (err) {
+      console.warn("[Ai3dCanvas] WebGL not supported or failed to initialize:", err);
+      setWebGlSupported(false);
+      return;
+    }
+
+    // 1. Scene, Camera
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / heightPx, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(45, width / (heightPx || 1), 0.1, 1000);
     camera.position.z = 18;
-
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
-    renderer.setSize(width, heightPx);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.appendChild(renderer.domElement);
 
     // 2. Objects
     const group = new THREE.Group();
@@ -244,6 +252,24 @@ export const Ai3dCanvas: React.FC<Ai3dCanvasProps> = ({
       renderer.dispose();
     };
   }, []);
+
+  if (!webGlSupported) {
+    return (
+      <div className={`relative w-full ${height} overflow-hidden rounded-3xl flex items-center justify-center bg-slate-950/60 border border-slate-800 ${className}`}>
+        <div className="relative flex items-center justify-center">
+          <div className="w-36 h-36 rounded-full bg-blue-500/10 border border-blue-500/20 animate-pulse flex items-center justify-center">
+            <div className="w-24 h-24 rounded-full bg-cyan-500/10 border border-cyan-400/30 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-400 opacity-80 blur-xs animate-ping" />
+            </div>
+          </div>
+        </div>
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-white/10 backdrop-blur-md text-[10px] font-mono font-bold text-blue-400 shadow-xl">
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          <span>NEURAL VISUAL CORE</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative w-full ${height} overflow-hidden rounded-3xl ${className}`}>

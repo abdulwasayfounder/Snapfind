@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from "react";
-import { supabase } from "../services/supabase";
+import { supabase, isSupabaseConfigured } from "../services/supabase";
 import { SubscriptionManager } from "../services/billing/SubscriptionManager";
 
 export interface FounderStats {
@@ -49,7 +49,7 @@ export const FounderProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const fetchAuthoritativeStats = useCallback(async () => {
     try {
       // 1. Direct Supabase database count query (Authoritative Source of Truth)
-      if (supabase) {
+      if (supabase && isSupabaseConfigured) {
         try {
           const { count, error } = await supabase
             .from("user_entitlements")
@@ -75,25 +75,29 @@ export const FounderProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       }
 
-      // 2. Query dedicated backend billing endpoint (which also queries Supabase server client)
-      const res = await fetch("/api/billing/founder-stats");
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success && isMountedRef.current) {
-          const claimed = typeof data.claimedSpots === "number" ? data.claimedSpots : typeof data.claimed === "number" ? data.claimed : 0;
-          const total = data.totalSpots || TOTAL_FOUNDER_LIMIT;
-          const remaining = Math.max(0, total - claimed);
-          setStats({
-            claimed,
-            totalSpots: total,
-            remaining,
-            isAvailable: remaining > 0,
-            isLive: true,
-            isLoading: false,
-            error: null,
-          });
-          return;
+      // 2. Query dedicated backend billing endpoint if running on web with server
+      try {
+        const res = await fetch("/api/billing/founder-stats");
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && isMountedRef.current) {
+            const claimed = typeof data.claimedSpots === "number" ? data.claimedSpots : typeof data.claimed === "number" ? data.claimed : 0;
+            const total = data.totalSpots || TOTAL_FOUNDER_LIMIT;
+            const remaining = Math.max(0, total - claimed);
+            setStats({
+              claimed,
+              totalSpots: total,
+              remaining,
+              isAvailable: remaining > 0,
+              isLive: true,
+              isLoading: false,
+              error: null,
+            });
+            return;
+          }
         }
+      } catch (fetchErr) {
+        // Expected when running on local mobile app or offline
       }
 
       // 3. Fallback to SubscriptionManager availability
@@ -125,9 +129,9 @@ export const FounderProvider: React.FC<{ children: React.ReactNode }> = ({ child
     isMountedRef.current = true;
     fetchAuthoritativeStats();
 
-    // Setup Supabase Realtime channel for instant real-time broadcasts
+    // Setup Supabase Realtime channel for instant real-time broadcasts (only if configured)
     let channel: any = null;
-    if (supabase) {
+    if (supabase && isSupabaseConfigured) {
       channel = supabase
         .channel("founder_realtime_sync")
         .on(

@@ -306,6 +306,11 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({
       onClose();
       return;
     }
+    if (notification.metadata?.isAppUpdate) {
+      window.dispatchEvent(new CustomEvent("snapfind_open_update"));
+      onClose();
+      return;
+    }
   };
 
   const handleCopy = (text: string, id: string, e: React.MouseEvent) => {

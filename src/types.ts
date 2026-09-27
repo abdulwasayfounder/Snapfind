@@ -101,6 +101,7 @@ export interface ScreenshotItem {
   processing_timestamp?: string;
   processingTimestamp?: string;
   syncStatus?: SyncStatus;
+  cloudSyncStatus?: string;
   syncError?: string;
   lastSyncedAt?: string;
   ocrAccuracyScore?: number;
@@ -532,6 +533,7 @@ export interface AppSettings {
   autoLaunchAtStartup?: boolean;
   confirmBeforeDelete?: boolean;
   defaultView?: string;
+  autoCheckUpdates?: boolean;
 
   // Notifications
   enableNotifications: boolean; // Master toggle for important notifications

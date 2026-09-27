@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(SnapFindMediaScannerPlugin.class);
         registerPlugin(SnapFindBillingPlugin.class);
+        registerPlugin(SnapFindAppUpdaterPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }
