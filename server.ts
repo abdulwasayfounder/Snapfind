@@ -70,6 +70,49 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+// Explicit SEO Endpoints: Serving valid XML sitemap and robots.txt with HTTP 200 and standard headers
+const PRODUCTION_SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://snapfind.ai.studio/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+
+const PRODUCTION_ROBOTS_TXT = `# SnapFind AI robots.txt
+# Public pages allowed for indexing; private dashboard/user routes blocked.
+
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+Allow: /robots.txt
+Allow: /logo.png
+Allow: /logo.svg
+Allow: /favicon.ico
+
+# Disallow internal API and admin routes
+Disallow: /api/
+Disallow: /admin-payments
+
+Sitemap: https://snapfind.ai.studio/sitemap.xml
+`;
+
+app.get("/sitemap.xml", (_req, res) => {
+  res.status(200);
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+  res.send(PRODUCTION_SITEMAP_XML.trim());
+});
+
+app.get("/robots.txt", (_req, res) => {
+  res.status(200);
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+  res.send(PRODUCTION_ROBOTS_TXT.trim());
+});
+
 // Helper: Parse base64 string, clean data URI prefix, and detect correct image MIME type via magic bytes
 function parseBase64Image(base64Data: string, providedMime: string = "image/png"): { cleanBase64: string; mimeType: string } {
   let mimeType = providedMime;

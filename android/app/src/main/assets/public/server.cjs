@@ -77,6 +77,44 @@ app.get("/api/health", (_req, res) => {
     geminiConfigured: Boolean(process.env.GEMINI_API_KEY)
   });
 });
+var PRODUCTION_SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://snapfind.ai.studio/</loc>
+    <lastmod>2026-09-29</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>`;
+var PRODUCTION_ROBOTS_TXT = `# SnapFind AI robots.txt
+# Public pages allowed for indexing; private dashboard/user routes blocked.
+
+User-agent: *
+Allow: /
+Allow: /sitemap.xml
+Allow: /robots.txt
+Allow: /logo.png
+Allow: /logo.svg
+Allow: /favicon.ico
+
+# Disallow internal API and admin routes
+Disallow: /api/
+Disallow: /admin-payments
+
+Sitemap: https://snapfind.ai.studio/sitemap.xml
+`;
+app.get("/sitemap.xml", (_req, res) => {
+  res.status(200);
+  res.setHeader("Content-Type", "application/xml; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+  res.send(PRODUCTION_SITEMAP_XML.trim());
+});
+app.get("/robots.txt", (_req, res) => {
+  res.status(200);
+  res.setHeader("Content-Type", "text/plain; charset=utf-8");
+  res.setHeader("Cache-Control", "public, max-age=3600, s-maxage=3600");
+  res.send(PRODUCTION_ROBOTS_TXT.trim());
+});
 function parseBase64Image(base64Data, providedMime = "image/png") {
   let mimeType = providedMime;
   const dataUriMatch = base64Data.match(/^data:([^;]+);base64,/i);

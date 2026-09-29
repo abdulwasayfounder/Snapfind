@@ -144,7 +144,7 @@ export function applySeoMetadata(view: NavViewType) {
   if (twDesc) twDesc.content = config.description;
 
   // 5. Update Canonical URL dynamically to reflect actual origin without breaking
-  const origin = window.location.origin || "https://ais-pre-2ztufua4tcuizbkzpm5xi4-438233974581.asia-east1.run.app";
+  const origin = window.location.origin || "https://snapfind.ai.studio";
   let canonicalLink = document.getElementById("sf-canonical") as HTMLLinkElement | null;
   if (!canonicalLink) {
     canonicalLink = document.querySelector('link[rel="canonical"]');
