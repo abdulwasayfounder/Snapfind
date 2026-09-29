@@ -81,20 +81,19 @@ const PRODUCTION_SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
   </url>
 </urlset>`;
 
-const PRODUCTION_ROBOTS_TXT = `# SnapFind AI robots.txt
-# Public pages allowed for indexing; private dashboard/user routes blocked.
-
-User-agent: *
+const PRODUCTION_ROBOTS_TXT = `User-agent: *
 Allow: /
-Allow: /sitemap.xml
-Allow: /robots.txt
-Allow: /logo.png
-Allow: /logo.svg
-Allow: /favicon.ico
 
-# Disallow internal API and admin routes
 Disallow: /api/
-Disallow: /admin-payments
+Disallow: /dashboard
+Disallow: /gallery
+Disallow: /search
+Disallow: /settings
+Disallow: /account
+Disallow: /collections
+Disallow: /timeline
+Disallow: /favorites
+Disallow: /trash
 
 Sitemap: https://snapfind.ai.studio/sitemap.xml
 `;

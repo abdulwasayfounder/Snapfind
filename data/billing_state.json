@@ -10,7 +10,7 @@
       "isLifetime": true,
       "founderNumber": 1,
       "founderRank": 1,
-      "founderGrantedAt": "2026-09-29T10:37:38.271Z",
+      "founderGrantedAt": "2026-09-29T12:19:47.431Z",
       "founderExpiresAt": null,
       "features": {
         "maxIndexedScreenshots": 150000,
@@ -26,7 +26,7 @@
       "canAiMultimodalSearch": true,
       "priorityProcessing": true,
       "status": "active",
-      "updatedAt": "2026-09-29T10:37:38.271Z"
+      "updatedAt": "2026-09-29T12:19:47.431Z"
     },
     "67484df8-d65e-4c7c-aa60-c361955655da": {
       "userId": "67484df8-d65e-4c7c-aa60-c361955655da",
@@ -37,7 +37,7 @@
       "isLifetime": true,
       "founderNumber": 2,
       "founderRank": 2,
-      "founderGrantedAt": "2026-09-29T10:37:38.271Z",
+      "founderGrantedAt": "2026-09-29T12:19:47.431Z",
       "founderExpiresAt": null,
       "features": {
         "maxIndexedScreenshots": 150000,
@@ -53,7 +53,7 @@
       "canAiMultimodalSearch": true,
       "priorityProcessing": true,
       "status": "active",
-      "updatedAt": "2026-09-29T10:37:38.271Z"
+      "updatedAt": "2026-09-29T12:19:47.431Z"
     },
     "2e87bf41-8f8a-4d10-a0e4-6231c60b60af": {
       "userId": "2e87bf41-8f8a-4d10-a0e4-6231c60b60af",
@@ -64,7 +64,7 @@
       "isLifetime": true,
       "founderNumber": 3,
       "founderRank": 3,
-      "founderGrantedAt": "2026-09-29T10:37:38.271Z",
+      "founderGrantedAt": "2026-09-29T12:19:47.431Z",
       "founderExpiresAt": null,
       "features": {
         "maxIndexedScreenshots": 150000,
@@ -80,7 +80,7 @@
       "canAiMultimodalSearch": true,
       "priorityProcessing": true,
       "status": "active",
-      "updatedAt": "2026-09-29T10:37:38.271Z"
+      "updatedAt": "2026-09-29T12:19:47.431Z"
     }
   },
   "subscriptions": {},
@@ -89,5 +89,5 @@
   "subscriptionEvents": [],
   "processedPaddleEvents": [],
   "usageStore": {},
-  "updatedAt": "2026-09-29T10:37:38.271Z"
+  "updatedAt": "2026-09-29T12:19:47.431Z"
 }
