@@ -30,16 +30,16 @@ const hasValidKey = Boolean(
     !rawKey.includes("supabase_anon_key")
 );
 
-// 1. Verify VITE_SUPABASE_URL comes from environment variables and is not placeholder
-export const supabaseUrl: string = hasValidUrl ? rawUrl! : "https://snapfind-app.supabase.co";
+// 1. Verify VITE_SUPABASE_URL comes from environment variables or active production project
+export const supabaseUrl: string = hasValidUrl ? rawUrl! : "https://bdrdcaxinjjsvjtrgqyj.supabase.co";
 
-// 2. Verify VITE_SUPABASE_ANON_KEY comes from environment variables
+// 2. Verify VITE_SUPABASE_ANON_KEY comes from environment variables or active production project
 export const supabaseAnonKey: string = hasValidKey
   ? rawKey!
-  : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNuYXBmaW5kIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzg5MDAwMDAsImV4cCI6MjAwNDQ3NjAwMH0.supabase_anon_key";
+  : "sb_publishable_yYJyTooSZ17GIFCtrlZ4Hg_2DxR0MQz";
 
 // 4. Ensure isSupabaseConfigured reflects actual availability of credentials
-export const isSupabaseConfigured: boolean = hasValidUrl && hasValidKey;
+export const isSupabaseConfigured: boolean = Boolean(supabaseUrl && supabaseAnonKey);
 
 // 5. Masked key output for verification
 const maskedKey = supabaseAnonKey ? `${supabaseAnonKey.slice(0, 10)}...${supabaseAnonKey.slice(-6)}` : "[HIDDEN]";

@@ -79,8 +79,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // 1. Callback Handler: Exchange OAuth code for session when returning from provider
     const processAuthCallback = async () => {
       const urlParams = new URLSearchParams(window.location.search);
+      const oauthError = urlParams.get("error");
+      const oauthErrorDescription = urlParams.get("error_description");
       const code = urlParams.get("code");
       const hash = window.location.hash;
+
+      if (oauthError) {
+        console.error(`[AuthContext] OAuth provider returned error: ${oauthError} (${oauthErrorDescription || "No description"})`);
+      }
 
       if (code) {
         console.log("[AuthContext] Exchanging OAuth code for session via exchangeCodeForSession...");
@@ -330,10 +336,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     try {
+      // Determine canonical redirect URL (guarantee production domain in production)
+      const isProduction =
+        typeof window !== "undefined" &&
+        (window.location.hostname === "snapfind.ai.studio" ||
+          window.location.origin.includes("snapfind.ai.studio"));
+
+      const canonicalOrigin = isProduction
+        ? "https://snapfind.ai.studio"
+        : (typeof window !== "undefined" ? window.location.origin.replace(/\/+$/, "") : "https://snapfind.ai.studio");
+
+      const redirectTo = `${canonicalOrigin}/`;
+
+      console.log(`[AuthContext] Initiating Google Sign-In with redirectTo: ${redirectTo}`);
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin + "/",
+          redirectTo,
+          queryParams: {
+            prompt: "select_account",
+            access_type: "offline",
+          },
         },
       });
 
