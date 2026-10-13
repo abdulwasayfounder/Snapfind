@@ -67,6 +67,9 @@ CREATE TABLE IF NOT EXISTS public.screenshots (
 CREATE INDEX IF NOT EXISTS idx_screenshots_user_id ON public.screenshots(user_id);
 CREATE INDEX IF NOT EXISTS idx_screenshots_category ON public.screenshots(category);
 CREATE INDEX IF NOT EXISTS idx_screenshots_created_at ON public.screenshots(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_screenshots_user_created ON public.screenshots(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_screenshots_user_category_created ON public.screenshots(user_id, category, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_screenshots_user_favorites ON public.screenshots(user_id, created_at DESC) WHERE is_favorite = TRUE;
 CREATE INDEX IF NOT EXISTS idx_screenshots_full_ocr_fts ON public.screenshots USING gin (to_tsvector('english', COALESCE(full_ocr_text, '')));
 
 -- Enable RLS on screenshots
@@ -74,19 +77,19 @@ ALTER TABLE public.screenshots ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Users can select own screenshots" 
     ON public.screenshots FOR SELECT 
-    USING (auth.uid() = user_id OR user_id IS NULL);
+    USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can insert own screenshots" 
     ON public.screenshots FOR INSERT 
-    WITH CHECK (auth.uid() = user_id OR user_id IS NULL);
+    WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can update own screenshots" 
     ON public.screenshots FOR UPDATE 
-    USING (auth.uid() = user_id OR user_id IS NULL);
+    USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own screenshots" 
     ON public.screenshots FOR DELETE 
-    USING (auth.uid() = user_id OR user_id IS NULL);
+    USING (auth.uid() = user_id);
 
 -- 3. SEARCH_HISTORY TABLE
 -- Logs past natural language search queries for rapid re-execution.

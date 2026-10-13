@@ -23,6 +23,46 @@ app.use(
 );
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+// Production Security Headers Middleware
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  next();
+});
+
+// Sliding-window IP Rate Limiter for sensitive endpoints
+interface RateLimitBucket {
+  count: number;
+  resetAt: number;
+}
+const ipRateLimits = new Map<string, RateLimitBucket>();
+
+function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
+  const now = Date.now();
+  const bucket = ipRateLimits.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    ipRateLimits.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (bucket.count >= maxRequests) {
+    return false;
+  }
+  bucket.count++;
+  return true;
+}
+
+// Clean up stale rate limits every 10 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [k, val] of ipRateLimits.entries()) {
+    if (val.resetAt <= now) ipRateLimits.delete(k);
+  }
+}, 10 * 60 * 1000);
+
 // Initialize Supabase Server Client if environment variables exist (server-side only)
 let supabaseServer: SupabaseClient | null = null;
 const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -75,7 +115,7 @@ const PRODUCTION_SITEMAP_XML = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://snapfind.ai.studio/</loc>
-    <lastmod>2026-09-29</lastmod>
+    <lastmod>2026-10-13</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -3547,7 +3587,7 @@ function saveFeedbackState(): void {
   }
 }
 
-// Endpoint: Submit Feedback
+// Endpoint: Submit Feedback (Secured with bot protection, rate limiting, and strict sanitization)
 app.post(["/api/feedback", "/api/feedback/submit"], async (req, res) => {
   try {
     const {
@@ -3561,30 +3601,60 @@ app.post(["/api/feedback", "/api/feedback/submit"], async (req, res) => {
       screenshot_url = null,
       user_email,
       platform = "Web",
+      hp_website,
+      website_honeypot,
     } = req.body;
 
-    const bodyDesc = (description || message || title || "").trim();
-    if (!bodyDesc) {
-      return res.status(400).json({ success: false, error: "Feedback message or description is required." });
+    // 1. Bot Honeypot Check (Silently drop automated spam bots without exposing detection)
+    if (hp_website || website_honeypot) {
+      console.warn("[Feedback] Automated bot honeypot trap triggered. Request silently dropped.");
+      return res.json({
+        success: true,
+        message: "Thank you! Your feedback has been received.",
+      });
     }
 
     const userId = (req.headers["x-user-id"] as string) || req.body.user_id || "guest";
+    const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.socket.remoteAddress || "client";
+
+    // 2. Sliding Window Rate Limiting (Maximum 5 feedback submissions per 10 minutes per IP/User)
+    const rateLimitKey = `feedback_${userId}_${clientIp}`;
+    if (!checkRateLimit(rateLimitKey, 5, 10 * 60 * 1000)) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many feedback submissions. Please wait a few minutes before submitting again.",
+      });
+    }
+
+    // 3. Input Sanitization & Length Limits
+    const sanitize = (text: string) => text.replace(/<[^>]*>/g, "").trim();
+
+    const rawDesc = (description || message || title || "").trim();
+    if (!rawDesc) {
+      return res.status(400).json({ success: false, error: "Feedback message or description is required." });
+    }
+
+    const cleanTitle = sanitize(String(title || "")).slice(0, 150) || `${type} from ${page}`;
+    const cleanDesc = sanitize(String(rawDesc)).slice(0, 3000);
+    const cleanEmail = user_email && typeof user_email === "string" ? sanitize(user_email).slice(0, 255) : undefined;
+    const cleanScreenshotUrl = screenshot_url && typeof screenshot_url === "string" && screenshot_url.startsWith("http") ? screenshot_url.slice(0, 1000) : null;
+
     const newId = `fb_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
     const nowIso = new Date().toISOString();
 
     const newRecord: FeedbackRecord = {
       id: newId,
       user_id: userId,
-      user_email: user_email || undefined,
-      type: String(type),
-      title: title ? String(title).trim() : `${type} from ${page}`,
-      description: bodyDesc,
+      user_email: cleanEmail,
+      type: String(type).slice(0, 50),
+      title: cleanTitle,
+      description: cleanDesc,
       rating: Math.max(1, Math.min(5, Number(rating) || 5)),
       nps_score: nps_score !== null && nps_score !== undefined ? Math.max(0, Math.min(10, Number(nps_score))) : null,
-      page: String(page),
-      screenshot_url: screenshot_url || null,
+      page: String(page).slice(0, 100),
+      screenshot_url: cleanScreenshotUrl,
       app_version: "v2.4.0",
-      platform: String(platform),
+      platform: String(platform).slice(0, 50),
       created_at: nowIso,
       status: "pending",
     };

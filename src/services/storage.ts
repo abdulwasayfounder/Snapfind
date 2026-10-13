@@ -476,6 +476,12 @@ export function clearUserSessionData(): void {
   try {
     localStorage.removeItem("snapfind_search_history_v1");
   } catch (e) {}
+
+  // Invalidate in-memory query cache across accounts
+  try {
+    const { searchCache } = require("./searchCache");
+    if (searchCache) searchCache.invalidateUser();
+  } catch (e) {}
 }
 
 export function loadSearchHistory(): SearchHistoryItem[] {

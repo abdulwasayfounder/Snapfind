@@ -25,8 +25,10 @@ export type NavViewType =
   | "account"
   | "notifications"
   | "feedback"
+  | "feedback-success"
   | "admin-payments"
-  | "game";
+  | "game"
+  | "not-found";
 
 interface BottomNavigationProps {
   activeView: NavViewType;

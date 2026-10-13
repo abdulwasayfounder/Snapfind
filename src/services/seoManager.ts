@@ -92,9 +92,19 @@ const VIEW_SEO_CONFIG: Record<NavViewType, PageSeoConfig> = {
     description: "Share feedback with the SnapFind team.",
     isPublic: false,
   },
+  "feedback-success": {
+    title: "Feedback Received – SnapFind AI",
+    description: "Thank you for sharing your feedback with the SnapFind AI team.",
+    isPublic: false,
+  },
   "admin-payments": {
     title: "Admin – SnapFind AI",
     description: "Administration portal.",
+    isPublic: false,
+  },
+  "not-found": {
+    title: "404 Page Not Found – SnapFind AI",
+    description: "The requested visual memory or page could not be found.",
     isPublic: false,
   },
 };
@@ -145,19 +155,9 @@ export function applySeoMetadata(view: NavViewType) {
 
   // 5. Update Canonical URL dynamically to reflect actual origin without breaking
   const origin = window.location.origin || "https://snapfind.ai.studio";
-  let canonicalLink = document.getElementById("sf-canonical") as HTMLLinkElement | null;
-  if (!canonicalLink) {
-    canonicalLink = document.querySelector('link[rel="canonical"]');
-  }
+  let canonicalLink = (document.getElementById("sf-canonical") || document.querySelector('link[rel="canonical"]')) as HTMLLinkElement | null;
   if (canonicalLink) {
-    // Canonical points to the canonical base for public marketing and specific public hash routes
-    if (view === "landing") {
-      canonicalLink.href = `${origin}/`;
-    } else if (config.isPublic) {
-      canonicalLink.href = `${origin}/#${view}`;
-    } else {
-      // For private views, canonical points to the root so search engines attribute authority to the root
-      canonicalLink.href = `${origin}/`;
-    }
+    // Canonical always points to the canonical public root URL
+    canonicalLink.href = `${origin}/`;
   }
 }

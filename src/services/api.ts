@@ -2,6 +2,8 @@ import { ScreenshotItem, SearchResultMatch } from "../types";
 import { searchEngine } from "./searchEngine";
 import { UsageService } from "./billing/UsageService";
 
+import { searchCache } from "./searchCache";
+
 export interface AnalyzeResponse {
   success: boolean;
   analysis?: {
@@ -30,11 +32,32 @@ export interface SearchResponse {
   error?: string;
 }
 
+// Fast string hashing for image payload deduplication
+function computeQuickHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) - hash + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return `h_${Math.abs(hash)}_${str.length}`;
+}
+
 export async function analyzeScreenshotImage(
   base64Data: string,
   fileName: string,
   mimeType: string = "image/png"
 ): Promise<AnalyzeResponse> {
+  // Deduplication check: Avoid re-analyzing the exact same image
+  const imageHash = computeQuickHash(base64Data);
+  const cachedAnalysis = searchCache.getCachedAnalysis(imageHash);
+  if (cachedAnalysis) {
+    console.log(`[API] Returning cached AI analysis for duplicate image hash: ${imageHash}`);
+    return {
+      success: true,
+      analysis: cachedAnalysis,
+    };
+  }
+
   try {
     const deviceId = UsageService.getDeviceId();
     const response = await fetch("/api/analyze-screenshot", {
@@ -66,8 +89,9 @@ export async function analyzeScreenshotImage(
     }
 
     const data: AnalyzeResponse = await response.json();
-    if (data.success) {
+    if (data.success && data.analysis) {
       UsageService.recordLocalAiScan();
+      searchCache.setCachedAnalysis(imageHash, data.analysis);
     }
     return data;
   } catch (error: any) {
@@ -82,43 +106,70 @@ export async function analyzeScreenshotImage(
 // Reliable instant natural language keyword search engine (<100ms latency)
 export function instantKeywordSearch(
   query: string,
-  screenshots: ScreenshotItem[]
+  screenshots: ScreenshotItem[],
+  userId: string = "guest"
 ): SearchResultMatch[] {
-  return searchEngine.search(query, screenshots);
+  const cached = searchCache.get(userId, query);
+  if (cached) return cached;
+
+  const results = searchEngine.search(query, screenshots);
+  searchCache.set(userId, query, results);
+  return results;
 }
 
 export async function searchScreenshotsAI(
   query: string,
-  screenshots: ScreenshotItem[]
+  screenshots: ScreenshotItem[],
+  userId: string = "guest"
 ): Promise<SearchResultMatch[]> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+  const cleanQuery = query.trim();
+  if (!cleanQuery) return [];
 
-    const response = await fetch("/api/search-screenshots", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        screenshots,
-      }),
-      signal: controller.signal,
-    });
-    clearTimeout(timeoutId);
+  return searchCache.executeDeduplicated(
+    userId,
+    cleanQuery,
+    "All",
+    async (signal) => {
+      try {
+        // Strip out heavy base64 data to keep payload ultra-lightweight (<20KB)
+        const lightweightScreenshots = screenshots.map((s) => ({
+          id: s.id,
+          title: s.title,
+          category: s.category,
+          tags: s.tags,
+          keyEntities: s.keyEntities,
+          summary: s.summary,
+          fullText: s.fullText?.slice(0, 500),
+          createdAt: s.createdAt,
+          isFavorite: s.isFavorite,
+        }));
 
-    if (!response.ok) {
-      return searchEngine.search(query, screenshots);
+        const response = await fetch("/api/search-screenshots", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            query: cleanQuery,
+            screenshots: lightweightScreenshots,
+          }),
+          signal,
+        });
+
+        if (!response.ok) {
+          return searchEngine.search(cleanQuery, screenshots);
+        }
+
+        const data: SearchResponse = await response.json();
+        if (data.success && Array.isArray(data.results) && data.results.length > 0) {
+          return data.results;
+        }
+
+        return searchEngine.search(cleanQuery, screenshots);
+      } catch (error) {
+        return searchEngine.search(cleanQuery, screenshots);
+      }
     }
-
-    const data: SearchResponse = await response.json();
-    if (data.success && Array.isArray(data.results) && data.results.length > 0) {
-      return data.results;
-    }
-
-    return searchEngine.search(query, screenshots);
-  } catch (error) {
-    return searchEngine.search(query, screenshots);
-  }
+  );
 }
+

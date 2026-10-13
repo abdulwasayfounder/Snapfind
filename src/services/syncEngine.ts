@@ -375,8 +375,14 @@ class SyncEngineService {
     try {
       const { data, error } = await supabase
         .from("screenshots")
-        .select("*")
-        .eq("user_id", userId);
+        .select(`
+          id, user_id, title, category, image_url, ocr_snippet,
+          full_ocr_text, key_entities, tags, created_at, date_modified,
+          is_favorite, file_size_mb, file_name, sha256_hash
+        `)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(500);
 
       if (error) {
         console.warn("[SyncEngine] Failed to download screenshots from Supabase:", error.message);
