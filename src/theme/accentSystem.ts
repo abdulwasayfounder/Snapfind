@@ -1,19 +1,15 @@
 /**
  * SnapFind AI - Accent Theme System
- * 
- * Provides centralized dynamic styling tokens for the 5 interface accent tones:
- * 1. Electric Blue (#3B82F6)
- * 2. Deep Indigo (#6366F1)
- * 3. Cyber Purple (#A855F7)
- * 4. Emerald Mint (#10B981)
- * 5. Amber Sun (#F59E0B)
- * 
- * Updates CSS variables dynamically on :root so buttons, active tabs,
- * sidebar states, rings, borders, and badges seamlessly update while
- * preserving SnapFind's premium dark canvas identity (#07090D).
+ *
+ * Provides centralized dynamic styling tokens with Electric Cyan as primary default:
+ * - Primary accent: #00D4FF
+ * - Hover accent: #00B8D9
+ * - Surface: #1E2226
+ * - Canvas: #101214
+ * - Borders: #30363D
  */
 
-export type AccentToneId = "blue" | "indigo" | "purple" | "emerald" | "amber";
+export type AccentToneId = "cyan" | "blue" | "emerald" | "amber";
 
 export interface AccentThemeConfig {
   id: AccentToneId;
@@ -31,61 +27,47 @@ export interface AccentThemeConfig {
 }
 
 export const ACCENT_THEMES: Record<AccentToneId, AccentThemeConfig> = {
+  cyan: {
+    id: "cyan",
+    label: "Electric Cyan",
+    name: "Electric Cyan",
+    primary: "#00D4FF",
+    hover: "#00B8D9",
+    soft: "rgba(0, 212, 255, 0.10)",
+    border: "#30363D",
+    glow: "rgba(0, 212, 255, 0.15)",
+    text: "#00D4FF",
+    ring: "rgba(0, 212, 255, 0.40)",
+    badgeBg: "rgba(0, 212, 255, 0.12)",
+    badgeText: "#00D4FF",
+  },
   blue: {
     id: "blue",
-    label: "Electric Blue",
-    name: "Electric Blue",
-    primary: "#3B82F6",
-    hover: "#2563EB",
-    soft: "rgba(59, 130, 246, 0.12)",
-    border: "rgba(59, 130, 246, 0.35)",
-    glow: "rgba(59, 130, 246, 0.25)",
-    text: "#60A5FA",
-    ring: "rgba(59, 130, 246, 0.45)",
-    badgeBg: "rgba(59, 130, 246, 0.15)",
-    badgeText: "#93C5FD",
-  },
-  indigo: {
-    id: "indigo",
-    label: "Deep Indigo",
-    name: "Deep Indigo",
-    primary: "#6366F1",
-    hover: "#4F46E5",
-    soft: "rgba(99, 102, 241, 0.12)",
-    border: "rgba(99, 102, 241, 0.35)",
-    glow: "rgba(99, 102, 241, 0.25)",
-    text: "#818CF8",
-    ring: "rgba(99, 102, 241, 0.45)",
-    badgeBg: "rgba(99, 102, 241, 0.15)",
-    badgeText: "#A5B4FC",
-  },
-  purple: {
-    id: "purple",
-    label: "Cyber Purple",
-    name: "Cyber Purple",
-    primary: "#A855F7",
-    hover: "#9333EA",
-    soft: "rgba(168, 85, 247, 0.12)",
-    border: "rgba(168, 85, 247, 0.35)",
-    glow: "rgba(168, 85, 247, 0.25)",
-    text: "#C084FC",
-    ring: "rgba(168, 85, 247, 0.45)",
-    badgeBg: "rgba(168, 85, 247, 0.15)",
-    badgeText: "#D8B4FE",
+    label: "Electric Cyan",
+    name: "Electric Cyan",
+    primary: "#00D4FF",
+    hover: "#00B8D9",
+    soft: "rgba(0, 212, 255, 0.10)",
+    border: "#30363D",
+    glow: "rgba(0, 212, 255, 0.15)",
+    text: "#00D4FF",
+    ring: "rgba(0, 212, 255, 0.40)",
+    badgeBg: "rgba(0, 212, 255, 0.12)",
+    badgeText: "#00D4FF",
   },
   emerald: {
     id: "emerald",
     label: "Emerald Mint",
     name: "Emerald Mint",
-    primary: "#10B981",
-    hover: "#059669",
-    soft: "rgba(16, 185, 129, 0.12)",
-    border: "rgba(16, 185, 129, 0.35)",
-    glow: "rgba(16, 185, 129, 0.25)",
-    text: "#34D399",
-    ring: "rgba(16, 185, 129, 0.45)",
-    badgeBg: "rgba(16, 185, 129, 0.15)",
-    badgeText: "#6EE7B7",
+    primary: "#22C55E",
+    hover: "#16A34A",
+    soft: "rgba(34, 197, 94, 0.10)",
+    border: "#30363D",
+    glow: "rgba(34, 197, 94, 0.15)",
+    text: "#22C55E",
+    ring: "rgba(34, 197, 94, 0.40)",
+    badgeBg: "rgba(34, 197, 94, 0.12)",
+    badgeText: "#22C55E",
   },
   amber: {
     id: "amber",
@@ -93,25 +75,25 @@ export const ACCENT_THEMES: Record<AccentToneId, AccentThemeConfig> = {
     name: "Amber Sun",
     primary: "#F59E0B",
     hover: "#D97706",
-    soft: "rgba(245, 158, 11, 0.12)",
-    border: "rgba(245, 158, 11, 0.35)",
-    glow: "rgba(245, 158, 11, 0.25)",
-    text: "#FBBF24",
-    ring: "rgba(245, 158, 11, 0.45)",
-    badgeBg: "rgba(245, 158, 11, 0.15)",
-    badgeText: "#FCD34D",
+    soft: "rgba(245, 158, 11, 0.10)",
+    border: "#30363D",
+    glow: "rgba(245, 158, 11, 0.15)",
+    text: "#F59E0B",
+    ring: "rgba(245, 158, 11, 0.40)",
+    badgeBg: "rgba(245, 158, 11, 0.12)",
+    badgeText: "#F59E0B",
   },
 };
 
-const ACCENT_STORAGE_KEY = "snapfind_accent_tone_v1";
+const ACCENT_STORAGE_KEY = "snapfind_accent_tone_v2";
 
 /**
  * Apply accent variables directly to document.documentElement
  */
-export function applyAccentTheme(accentId: AccentToneId = "blue"): void {
+export function applyAccentTheme(accentId: AccentToneId = "cyan"): void {
   if (typeof document === "undefined") return;
 
-  const theme = ACCENT_THEMES[accentId] || ACCENT_THEMES.blue;
+  const theme = ACCENT_THEMES[accentId] || ACCENT_THEMES.cyan;
   const root = document.documentElement;
 
   root.style.setProperty("--accent-primary", theme.primary);
@@ -137,7 +119,7 @@ export function applyAccentTheme(accentId: AccentToneId = "blue"): void {
  * Get currently stored accent tone
  */
 export function getStoredAccentTheme(): AccentToneId {
-  if (typeof localStorage === "undefined") return "blue";
+  if (typeof localStorage === "undefined") return "cyan";
   try {
     const stored = localStorage.getItem(ACCENT_STORAGE_KEY) as AccentToneId;
     if (stored && ACCENT_THEMES[stored]) {
@@ -146,5 +128,5 @@ export function getStoredAccentTheme(): AccentToneId {
   } catch (e) {
     // ignore
   }
-  return "blue";
+  return "cyan";
 }

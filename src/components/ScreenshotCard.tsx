@@ -5,11 +5,9 @@ import {
   Image as ImageIcon,
   Check,
   Maximize2,
-  ShieldAlert,
   Lock,
   Copy,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { ScreenshotItem, SearchResultMatch, CategoryType } from "../types";
 import { FALLBACK_IMAGE_PLACEHOLDER, markImageFailed } from "../services/imageCache";
 
@@ -29,7 +27,6 @@ interface ScreenshotCardProps {
 
 export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
   item,
-  isDark,
   isSelected = false,
   isSelectionMode = false,
   onSelect,
@@ -74,19 +71,17 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
   return (
     <div
       onClick={handleCardClick}
-      className={`group relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-200 ${
+      className={`group relative rounded-xl border overflow-hidden cursor-pointer transition-colors duration-150 ${
         isSelected
-          ? "bg-[#18202B] border-[#3B82F6] ring-2 ring-[#3B82F6]/40 shadow-[0_0_20px_rgba(59,130,246,0.25)]"
-          : isDark
-          ? "bg-[#121821] border-white/[0.08] hover:border-[#3B82F6]/40 hover:bg-[#18202B] hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.7),0_0_18px_-4px_rgba(59,130,246,0.18)]"
-          : "bg-white border-slate-200 hover:border-slate-300 shadow-sm"
+          ? "bg-[#1E2226] border-[#00D4FF] ring-1 ring-[#00D4FF]/40"
+          : "bg-[#1E2226] border-[#30363D] hover:border-[#00D4FF] hover:bg-[#262C32]"
       }`}
     >
       {/* Thumbnail Image Container */}
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#07090D]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#101214]">
         {!imgLoaded && (
-          <div className="absolute inset-0 bg-[#0D1117] flex items-center justify-center text-slate-600">
-            <ImageIcon className="w-8 h-8 opacity-30" />
+          <div className="absolute inset-0 bg-[#171A1D] flex items-center justify-center text-[#6B7280]">
+            <ImageIcon className="w-8 h-8 opacity-40" />
           </div>
         )}
 
@@ -95,7 +90,7 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
           alt={item.title}
           onLoad={() => setImgLoaded(true)}
           onError={handleImageError}
-          className={`w-full h-full object-cover object-top transition-all duration-300 group-hover:scale-105 ${
+          className={`w-full h-full object-cover object-top transition-opacity duration-200 ${
             imgLoaded ? "opacity-90 group-hover:opacity-100" : "opacity-0"
           } ${isSensitive && !isRevealed ? "filter blur-md scale-105 brightness-75" : ""}`}
           loading="lazy"
@@ -109,7 +104,7 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
               e.stopPropagation();
               setIsRevealed((r) => !r);
             }}
-            className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-rose-500/85 hover:bg-rose-600 backdrop-blur-md border border-rose-400/30 text-white text-[10px] font-bold flex items-center gap-1 shadow-md transition-colors cursor-pointer"
+            className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-md bg-[#171A1D]/90 border border-[#EF4444]/40 text-[#EF4444] text-[10px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
             title={isRevealed ? "Tap to blur" : "Tap to reveal screenshot"}
           >
             <Lock className="w-2.5 h-2.5" />
@@ -117,22 +112,22 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
           </button>
         )}
 
-        {/* Smart Category Indicator (if not sensitive) */}
+        {/* Smart Category Indicator */}
         {!isSensitive && (item.smart_category || item.smartCategory) && (item.smart_category || item.smartCategory) !== "Other" && (
-          <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-lg bg-black/75 backdrop-blur-md border border-emerald-500/30 text-[#00FF66] text-[10px] font-bold flex items-center gap-1 shadow-md">
+          <div className="absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-md bg-[#171A1D]/90 border border-[#00D4FF]/30 text-[#00D4FF] text-[10px] font-medium flex items-center gap-1">
             <span>{item.smart_category || item.smartCategory}</span>
           </div>
         )}
 
-        {/* Duplicate Badge if flagged */}
+        {/* Duplicate Badge */}
         {isDuplicateItem && (
-          <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded-lg bg-amber-500/80 backdrop-blur-md border border-amber-400/30 text-white text-[10px] font-bold flex items-center gap-1 shadow-md">
+          <div className="absolute bottom-2 right-2 z-10 px-2 py-0.5 rounded-md bg-[#171A1D]/90 border border-[#F59E0B]/30 text-[#F59E0B] text-[10px] font-medium flex items-center gap-1">
             <Copy className="w-2.5 h-2.5" />
             <span>Duplicate</span>
           </div>
         )}
 
-        {/* Multi-Select Checkbox (Top Left) */}
+        {/* Multi-Select Checkbox */}
         {(isSelectionMode || isSelected) && (
           <button
             type="button"
@@ -140,27 +135,27 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
               e.stopPropagation();
               onToggleSelect?.(item.id);
             }}
-            className={`absolute top-2.5 left-2.5 z-10 w-7 h-7 rounded-xl flex items-center justify-center transition-all ${
+            className={`absolute top-2 left-2 z-10 w-6 h-6 rounded-lg flex items-center justify-center transition-colors ${
               isSelected
-                ? "bg-[#3B82F6] text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                : "bg-black/60 backdrop-blur-md border border-white/30 text-transparent"
+                ? "bg-[#00D4FF] text-[#101214]"
+                : "bg-[#171A1D]/80 border border-[#30363D] text-transparent"
             }`}
           >
-            {isSelected && <Check className="w-4 h-4 stroke-[2.5]" />}
+            {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
           </button>
         )}
 
-        {/* Small Favorite Button (Top Right) */}
+        {/* Favorite Button */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onToggleFavorite(item.id);
           }}
-          className={`absolute top-2.5 right-2.5 z-10 p-2 rounded-xl backdrop-blur-md transition-all ${
+          className={`absolute top-2 right-2 z-10 p-1.5 rounded-lg transition-colors cursor-pointer ${
             item.isFavorite
-              ? "bg-rose-500/90 text-white shadow-sm"
-              : "opacity-0 group-hover:opacity-100 bg-black/60 text-slate-300 hover:text-white border border-white/[0.08]"
+              ? "bg-[#171A1D]/90 text-[#EF4444] border border-[#EF4444]/30"
+              : "opacity-0 group-hover:opacity-100 bg-[#171A1D]/80 text-[#A7B0BA] hover:text-[#F5F7FA] border border-[#30363D]"
           }`}
           title={item.isFavorite ? "Favorited" : "Add to favorites"}
         >
@@ -168,25 +163,24 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
         </button>
       </div>
 
-      {/* Card Content: Title, 1-line description, Date & Inspect */}
-      <div className="p-3.5 sm:p-4 space-y-1.5">
-        <h3 className="font-semibold text-sm sm:text-base text-[#F8FAFC] line-clamp-1 group-hover:text-blue-400 transition-colors">
+      {/* Card Content */}
+      <div className="p-3.5 space-y-1.5">
+        <h3 className="font-semibold text-xs sm:text-sm text-[#F5F7FA] line-clamp-1 group-hover:text-[#00D4FF] transition-colors">
           {item.title}
         </h3>
 
-        {/* Short 1-line description */}
-        <p className="text-xs text-[#94A3B8] line-clamp-1 leading-normal">
+        <p className="text-xs text-[#A7B0BA] line-clamp-1 leading-normal">
           {item.summary || "Screenshot capture"}
         </p>
 
-        {/* Footer: Date & Inspect Action */}
-        <div className="flex items-center justify-between pt-1.5 text-[11px] text-[#64748B] border-t border-white/[0.05]">
+        {/* Footer: Date & Inspect */}
+        <div className="flex items-center justify-between pt-1 text-[11px] text-[#6B7280] border-t border-[#30363D]">
           <div className="flex items-center gap-1.5">
-            <Calendar className="w-3 h-3 text-[#64748B]" />
+            <Calendar className="w-3 h-3 text-[#6B7280]" />
             <span>{formattedDate}</span>
           </div>
 
-          <span className="text-[#3B82F6] group-hover:text-blue-300 font-medium flex items-center gap-1 text-[11px]">
+          <span className="text-[#00D4FF] group-hover:text-[#00B8D9] font-medium flex items-center gap-1">
             <Maximize2 className="w-3 h-3" /> Inspect
           </span>
         </div>
@@ -194,3 +188,4 @@ export const ScreenshotCard: React.FC<ScreenshotCardProps> = ({
     </div>
   );
 };
+export default ScreenshotCard;

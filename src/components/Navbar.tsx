@@ -57,13 +57,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header
-      className={`sticky top-0 z-40 border-b backdrop-blur-xl transition-colors select-none ${
-        isDark
-          ? "bg-[#0D1117]/90 border-white/[0.08] text-[#F8FAFC]"
-          : "bg-white/90 border-slate-200 text-slate-900 shadow-sm"
-      }`}
+      className="sticky top-0 z-40 border-b select-none bg-[#171A1D] border-[#30363D] text-[#F5F7FA]"
     >
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-15 flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3">
         {/* Left: Hamburger (Mobile) + Brand Logo & Title */}
         <div className="flex items-center gap-2">
           {onToggleMobileMenu && (
@@ -72,7 +68,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={onToggleMobileMenu}
               title="Open Navigation Menu"
-              className="lg:hidden p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+              className="lg:hidden p-2 rounded-xl text-[#A7B0BA] hover:text-[#F5F7FA] hover:bg-[#1E2226] transition-colors cursor-pointer"
             >
               <Menu className="w-5 h-5" />
             </button>
@@ -83,13 +79,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2.5 cursor-pointer group shrink-0"
           >
             <SnapFindLogo
-              className="w-8 h-8 rounded-xl object-contain border border-white/[0.08] bg-[#07090D] shadow-sm group-hover:border-[#CCFF00]/40 transition-colors"
+              className="w-8 h-8 rounded-xl object-contain border border-[#30363D] bg-[#101214] transition-colors group-hover:border-[#00D4FF]"
             />
             <div className="flex items-center gap-1">
-              <span className="font-extrabold text-base sm:text-lg tracking-tight text-white">
-                Snap<span className="bg-gradient-to-r from-[#CCFF00] to-[#00FF66] bg-clip-text text-transparent">Find</span>
+              <span className="font-bold text-base sm:text-lg tracking-tight text-[#F5F7FA]">
+                Snap<span className="text-[#00D4FF]">Find</span>
               </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 ml-1">
+              <span className="hidden sm:inline-block px-1.5 py-0.2 rounded text-[9px] font-bold uppercase tracking-wider bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/25 ml-1">
                 AI
               </span>
             </div>
@@ -100,13 +96,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Sync indicator */}
           {syncState.isSyncing && (
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/20">
-              <RefreshCw className="w-3 h-3 animate-spin text-[#00FF66]" />
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs text-[#00D4FF] bg-[#00D4FF]/10 border border-[#00D4FF]/20">
+              <RefreshCw className="w-3 h-3 animate-spin text-[#00D4FF]" />
               <span>Syncing</span>
             </div>
           )}
           {syncState.lastError && (
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs text-[#FF6600] bg-[#FF6600]/10 border border-[#FF6600]/20">
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs text-[#F59E0B] bg-[#F59E0B]/10 border border-[#F59E0B]/20">
               <AlertTriangle className="w-3 h-3" />
               <span>Sync Issue</span>
             </div>
@@ -117,7 +113,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={onOpenImport}
             id="import-btn-header"
             type="button"
-            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl bg-[#CCFF00] hover:bg-[#D9FF33] active:scale-98 text-[#07090D] text-xs font-bold shadow-[0_0_15px_rgba(204,255,0,0.25)] transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 sm:px-4 py-1.5 rounded-xl bg-[#00D4FF] hover:bg-[#00B8D9] active:scale-98 text-[#101214] text-xs font-semibold transition-colors cursor-pointer"
           >
             <UploadCloud className="w-4 h-4" />
             <span className="hidden sm:inline">Import</span>
@@ -129,11 +125,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="notification-center-btn"
             type="button"
             title="Notifications"
-            className="relative p-2 rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/5 border border-transparent hover:border-white/[0.08] transition-colors cursor-pointer"
+            className="relative p-2 rounded-xl text-[#A7B0BA] hover:text-[#F5F7FA] hover:bg-[#1E2226] border border-transparent hover:border-[#30363D] transition-colors cursor-pointer"
           >
             <Bell className="w-4 h-4" />
             {unreadNotificationCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF6600] shadow-[0_0_8px_rgba(255,102,0,0.8)] ring-2 ring-[#0D1117]" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#F59E0B] ring-2 ring-[#171A1D]" />
             )}
           </button>
 
@@ -143,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             id="user-profile-btn"
             type="button"
             title={user.isLoggedIn ? user.name : "Sign In"}
-            className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl border border-white/[0.08] hover:border-white/20 bg-[#121821] hover:bg-[#182230] transition-all cursor-pointer text-xs font-medium text-[#F8FAFC]"
+            className="flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-xl border border-[#30363D] hover:border-[#00D4FF]/40 bg-[#1E2226] hover:bg-[#262C32] transition-colors cursor-pointer text-xs font-medium text-[#F5F7FA]"
           >
             {user.avatarUrl && user.isLoggedIn && !avatarError ? (
               <img
@@ -154,7 +150,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className="w-5 h-5 rounded-lg object-cover shrink-0"
               />
             ) : (
-              <User className="w-4 h-4 text-[#94A3B8] shrink-0" />
+              <User className="w-4 h-4 text-[#A7B0BA] shrink-0" />
             )}
             <span className="hidden sm:inline truncate max-w-[100px]">
               {user.isLoggedIn ? user.name : "Sign In"}

@@ -329,8 +329,8 @@ export const ScreenshotGrid: React.FC<ScreenshotGridProps> = ({
       )}
 
       {/* Category Pills & Interactive Filters Toolbar */}
-      <div className="space-y-4 pb-4 border-b border-slate-800/40 dark:border-slate-800">
-        {/* Category & Special Filter Pills */}
+      <div className="space-y-4 pb-4 border-b border-[#30363D]">
+        {/* Category Pills */}
         <div className="flex items-center justify-between gap-3 overflow-x-auto pb-1 scrollbar-none">
           <div className="flex items-center gap-2">
             {ALL_CATEGORIES.map((cat) => {
@@ -340,18 +340,15 @@ export const ScreenshotGrid: React.FC<ScreenshotGridProps> = ({
               return (
                 <button
                   key={cat}
+                  type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 cursor-pointer ${
                     isSelectedCat
-                      ? isFavPill
-                        ? "bg-amber-500 text-white shadow-lg shadow-amber-500/30"
-                        : "bg-blue-600 text-white shadow-lg shadow-blue-500/30"
-                      : isDark
-                      ? "bg-[#18181B] border border-white/10 text-slate-400 hover:text-white hover:border-blue-500/40"
-                      : "bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200"
+                      ? "bg-[#1E2226] text-[#00D4FF] border border-[#00D4FF] font-semibold"
+                      : "bg-[#171A1D] border border-[#30363D] text-[#A7B0BA] hover:text-[#F5F7FA] hover:border-[#00D4FF]/40"
                   }`}
                 >
-                  {isFavPill && <Star className={`w-3.5 h-3.5 ${isSelectedCat ? "fill-white" : "text-amber-400 fill-amber-400"}`} />}
+                  {isFavPill && <Star className={`w-3.5 h-3.5 ${isSelectedCat ? "fill-[#00D4FF]" : "text-[#F59E0B] fill-[#F59E0B]"}`} />}
                   <span>{cat}</span>
                 </button>
               );
@@ -363,22 +360,19 @@ export const ScreenshotGrid: React.FC<ScreenshotGridProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           {/* Quick Search inside Gallery */}
           <div className="relative flex-1 max-w-xs">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#A7B0BA]" />
             <input
               type="text"
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               placeholder="Filter gallery..."
-              className={`w-full pl-9 pr-8 py-2 rounded-2xl text-xs font-medium border outline-none transition-all ${
-                isDark
-                  ? "bg-slate-900/80 border-slate-800 text-slate-100 placeholder-slate-500 focus:border-blue-500"
-                  : "bg-white border-slate-200 text-slate-900 placeholder-slate-400 focus:border-blue-500"
-              }`}
+              className="w-full pl-9 pr-8 py-2 rounded-xl text-xs font-medium border border-[#30363D] bg-[#1E2226] text-[#F5F7FA] placeholder-[#6B7280] focus:border-[#00D4FF] focus:outline-none transition-colors"
             />
             {localSearch && (
               <button
+                type="button"
                 onClick={() => setLocalSearch("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-0.5"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#A7B0BA] hover:text-[#F5F7FA] p-0.5"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -388,34 +382,29 @@ export const ScreenshotGrid: React.FC<ScreenshotGridProps> = ({
           {/* Right Toolbar Actions */}
           <div className="flex items-center justify-between sm:justify-end gap-3 text-xs">
             {/* Multi-Select Toggle Button */}
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
+              type="button"
               onClick={() => {
                 setIsSelectionMode(!isSelectionMode);
                 if (isSelectionMode) setSelectedIds(new Set());
               }}
-              className={`px-3.5 py-2 rounded-xl border font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+              className={`px-3 py-2 rounded-xl border text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
                 isSelectionMode || selectedIds.size > 0
-                  ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-blue-400 shadow-md shadow-blue-500/25 ring-2 ring-blue-500/30"
-                  : isDark
-                  ? "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800"
-                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
+                  ? "bg-[#00D4FF] text-[#101214] border-[#00D4FF] font-semibold"
+                  : "bg-[#1E2226] border-[#30363D] text-[#A7B0BA] hover:text-[#F5F7FA] hover:border-[#00D4FF]/40"
               }`}
             >
               {selectedIds.size > 0 ? <CheckSquare className="w-4 h-4" /> : <Square className="w-4 h-4" />}
               <span>{isSelectionMode ? "Exit Multi-Select" : "Multi-Select"}</span>
-            </motion.button>
+            </button>
 
             {/* Select Quick Tools */}
             {(isSelectionMode || selectedIds.size > 0) && (
               <div className="flex items-center gap-1.5">
                 <button
+                  type="button"
                   onClick={handleToggleSelectAll}
-                  className={`px-2.5 py-2 rounded-xl border text-[11px] font-medium transition-all ${
-                    isDark
-                      ? "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
-                  }`}
+                  className="px-2.5 py-1.5 rounded-lg border border-[#30363D] bg-[#1E2226] text-[#A7B0BA] hover:text-[#F5F7FA] text-xs font-medium transition-colors"
                   title="Select / deselect items on current page"
                 >
                   {selectedIds.size === paginatedItems.length && paginatedItems.length > 0
@@ -423,12 +412,9 @@ export const ScreenshotGrid: React.FC<ScreenshotGridProps> = ({
                     : "Select Page"}
                 </button>
                 <button
+                  type="button"
                   onClick={handleSelectAllFiltered}
-                  className={`px-2.5 py-2 rounded-xl border text-[11px] font-medium transition-all ${
-                    isDark
-                      ? "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800"
-                      : "bg-white border-slate-200 text-slate-700 hover:bg-slate-100"
-                  }`}
+                  className="px-2.5 py-1.5 rounded-lg border border-[#30363D] bg-[#1E2226] text-[#A7B0BA] hover:text-[#F5F7FA] text-xs font-medium transition-colors"
                   title="Select all matching items"
                 >
                   Select All ({filtered.length})
@@ -437,15 +423,12 @@ export const ScreenshotGrid: React.FC<ScreenshotGridProps> = ({
             )}
 
             {/* Layout View Switcher */}
-            <div
-              className={`flex items-center p-1 rounded-xl border ${
-                isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
-              }`}
-            >
+            <div className="flex items-center p-0.5 rounded-lg border border-[#30363D] bg-[#1E2226]">
               <button
+                type="button"
                 onClick={() => setViewLayout("grid")}
-                className={`p-1.5 rounded-lg transition-colors ${
-                  viewLayout === "grid" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-slate-200"
+                className={`p-1.5 rounded-md transition-colors ${
+                  viewLayout === "grid" ? "bg-[#00D4FF] text-[#101214]" : "text-[#A7B0BA] hover:text-[#F5F7FA]"
                 }`}
                 title="Default Grid View"
               >

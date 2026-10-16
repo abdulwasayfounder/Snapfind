@@ -2,53 +2,53 @@
 
 @layer base {
   :root {
-    /* SnapFind AI Brand Color Tokens */
-    --sf-bg: #07090d;
-    --sf-surface: #0d1117;
-    --sf-surface-elevated: #121821;
-    --sf-surface-hover: #182230;
-    --sf-border: rgba(255, 255, 255, 0.08);
-    --sf-border-hover: rgba(204, 255, 0, 0.35);
+    /* SnapFind AI Brand Color Tokens: Premium Graphite + Electric Cyan */
+    --sf-bg: #101214;
+    --sf-surface: #171A1D;
+    --sf-surface-elevated: #1E2226;
+    --sf-surface-hover: #262C32;
+    --sf-border: #30363D;
+    --sf-border-hover: #00D4FF;
 
-    --sf-primary: #ccff00;
-    --sf-primary-hover: #d9ff33;
-    --sf-ai: #00ff66;
-    --sf-ai-hover: #33ff85;
-    --sf-attention: #ff6600;
-    --sf-highlight: #ffff00;
-    --sf-danger: #ff0000;
+    --sf-primary: #00D4FF;
+    --sf-primary-hover: #00B8D9;
+    --sf-ai: #00D4FF;
+    --sf-ai-hover: #00B8D9;
+    --sf-attention: #F59E0B;
+    --sf-highlight: #00D4FF;
+    --sf-danger: #EF4444;
 
-    --sf-text: #f8fafc;
-    --sf-text-secondary: #94a3b8;
-    --sf-text-muted: #64748b;
-    --sf-text-disabled: #475569;
+    --sf-text: #F5F7FA;
+    --sf-text-secondary: #A7B0BA;
+    --sf-text-muted: #6B7280;
+    --sf-text-disabled: #4B5563;
 
-    /* Interface Accent Tone Variables (5 Swatches: Blue, Indigo, Purple, Emerald, Amber) */
-    --accent-primary: #3b82f6;
-    --accent-hover: #2563eb;
-    --accent-soft: rgba(59, 130, 246, 0.12);
-    --accent-border: rgba(59, 130, 246, 0.35);
-    --accent-glow: rgba(59, 130, 246, 0.25);
-    --accent-text: #60a5fa;
-    --accent-ring: rgba(59, 130, 246, 0.45);
-    --accent-badge-bg: rgba(59, 130, 246, 0.15);
-    --accent-badge-text: #93c5fd;
+    /* Interface Accent Tone Variables */
+    --accent-primary: #00D4FF;
+    --accent-hover: #00B8D9;
+    --accent-soft: rgba(0, 212, 255, 0.10);
+    --accent-border: #30363D;
+    --accent-glow: rgba(0, 212, 255, 0.15);
+    --accent-text: #00D4FF;
+    --accent-ring: rgba(0, 212, 255, 0.40);
+    --accent-badge-bg: rgba(0, 212, 255, 0.12);
+    --accent-badge-text: #00D4FF;
 
-    /* Legacy compatibility mappings */
-    --bg-obsidian: #07090d;
-    --bg-secondary: #0d1117;
-    --bg-elevated: #121821;
-    --bg-hover: #182230;
-    --border-subtle: rgba(255, 255, 255, 0.08);
+    /* Semantic Compatibility */
+    --bg-obsidian: #101214;
+    --bg-secondary: #171A1D;
+    --bg-elevated: #1E2226;
+    --bg-hover: #262C32;
+    --border-subtle: #30363D;
 
-    --color-electric-blue: #ccff00;
-    --color-neon-violet: #00ff66;
-    --color-attention-orange: #ff6600;
+    --color-electric-blue: #00D4FF;
+    --color-neon-violet: #00D4FF;
+    --color-attention-orange: #F59E0B;
 
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --text-disabled: #475569;
+    --text-primary: #F5F7FA;
+    --text-secondary: #A7B0BA;
+    --text-muted: #6B7280;
+    --text-disabled: #4B5563;
   }
 
   html,
@@ -60,7 +60,6 @@
     padding: 0;
   }
 
-  /* Desktop viewport constraint: prevent body from scrolling, allowing only main content container to scroll */
   @media (min-width: 1024px) {
     html,
     body {
@@ -69,90 +68,77 @@
   }
 
   body {
-    background-color: #07090d;
-    color: #f8fafc;
+    background-color: #101214;
+    color: #F5F7FA;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom Utilities for SnapFind AI Design System */
 @layer utilities {
   /* Surfaces */
   .bg-obsidian {
-    background-color: #07090d;
+    background-color: #101214;
   }
   .bg-surface-secondary {
-    background-color: #0d1117;
+    background-color: #171A1D;
   }
   .bg-surface-elevated {
-    background-color: #121821;
+    background-color: #1E2226;
   }
   .bg-surface-hover {
-    background-color: #182230;
+    background-color: #262C32;
   }
 
   /* Borders */
   .border-subtle {
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: #30363D;
   }
 
-  /* Glass Panels */
+  /* Solid Clean Panels */
   .glass-panel {
-    background: rgba(13, 17, 23, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #171A1D;
+    border: 1px solid #30363D;
   }
 
   .glass-card {
-    background: rgba(18, 24, 33, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #1E2226;
+    border: 1px solid #30363D;
   }
 
   .glass-card-hover {
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card-hover:hover {
-    background-color: #182230;
-    border-color: rgba(204, 255, 0, 0.35);
-    box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.7), 0 0 20px -4px rgba(204, 255, 0, 0.15);
-    transform: translateY(-2px);
+    background-color: #262C32;
+    border-color: #00D4FF;
+    transform: translateY(-1px);
   }
 
-  /* AI Gradients */
+  /* Clean Solid Brand Accents */
   .bg-ai-gradient {
-    background: linear-gradient(135deg, #ccff00 0%, #00ff66 100%);
+    background-color: #00D4FF;
   }
 
   .text-ai-gradient {
-    background: linear-gradient(135deg, #ccff00 0%, #00ff66 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #00D4FF;
   }
 
   .text-speed-gradient {
-    background: linear-gradient(90deg, #ff6600 0%, #ccff00 50%, #00ff66 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #00D4FF;
   }
 
-  /* Button System */
+  /* Clean Button System */
   .btn-primary {
-    background-color: #ccff00;
-    color: #07090d;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 14px -2px rgba(204, 255, 0, 0.3);
+    background-color: #00D4FF;
+    color: #101214;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
   }
 
   .btn-primary:hover {
-    background-color: #d9ff33;
-    box-shadow: 0 6px 20px -2px rgba(204, 255, 0, 0.45), 0 0 15px 0 rgba(204, 255, 0, 0.2);
-    transform: translateY(-1px);
+    background-color: #00B8D9;
   }
 
   .btn-primary:active {
@@ -160,82 +146,64 @@
   }
 
   .btn-secondary {
-    background-color: #121821;
-    color: #f8fafc;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    font-weight: 600;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    background-color: #1E2226;
+    color: #F5F7FA;
+    border: 1px solid #30363D;
+    border-radius: 10px;
+    font-weight: 500;
+    transition: all 0.15s ease-in-out;
   }
 
   .btn-secondary:hover {
-    background-color: #182230;
-    border-color: rgba(204, 255, 0, 0.25);
-    color: #ccff00;
+    background-color: #262C32;
+    border-color: #00D4FF;
+    color: #00D4FF;
   }
 
   .btn-ai-premium {
-    background: linear-gradient(135deg, #ccff00 0%, #00ff66 100%);
-    color: #07090d;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 18px -2px rgba(0, 255, 102, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: #00D4FF;
+    color: #101214;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
   }
 
   .btn-ai-premium:hover {
-    opacity: 0.95;
-    box-shadow: 0 8px 24px -2px rgba(0, 255, 102, 0.45), 0 0 20px 0 rgba(204, 255, 0, 0.25);
-    transform: translateY(-1px);
-  }
-
-  .btn-ai-premium:active {
-    transform: scale(0.98);
+    background-color: #00B8D9;
   }
 
   .btn-attention {
-    background-color: #ff6600;
-    color: #ffffff;
-    border-radius: 12px;
+    background-color: #F59E0B;
+    color: #101214;
+    border-radius: 10px;
     font-weight: 600;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 14px -2px rgba(255, 102, 0, 0.35);
+    transition: all 0.15s ease-in-out;
   }
 
   .btn-attention:hover {
-    background-color: #ff7a1a;
-    box-shadow: 0 6px 20px -2px rgba(255, 102, 0, 0.5), 0 0 15px 0 rgba(255, 102, 0, 0.3);
-    transform: translateY(-1px);
-  }
-
-  .btn-attention:active {
-    transform: scale(0.98);
+    background-color: #D97706;
   }
 
   .btn-danger {
-    background-color: #ff0000;
+    background-color: #EF4444;
     color: #ffffff;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 600;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 14px -2px rgba(255, 0, 0, 0.35);
+    transition: all 0.15s ease-in-out;
   }
 
   .btn-danger:hover {
-    background-color: #e60000;
-    box-shadow: 0 6px 20px -2px rgba(255, 0, 0, 0.5);
-    transform: translateY(-1px);
+    background-color: #DC2626;
   }
 
-  /* Search Glow */
+  /* Focused Search Input */
   .search-glow-focused {
-    border-color: #ccff00;
-    box-shadow: 0 0 25px -4px rgba(204, 255, 0, 0.2), 0 0 45px -8px rgba(0, 255, 102, 0.12);
+    border-color: #00D4FF;
+    box-shadow: 0 0 0 1px #00D4FF;
   }
 }
 
-/* Subtle Shimmer & AI Scanning */
+/* Subtle Shimmer for Skeleton Loaders */
 @keyframes shimmerEffect {
   0% {
     background-position: -200% 0;
@@ -245,65 +213,31 @@
   }
 }
 
-@keyframes aiThinkingPulse {
-  0%, 100% {
-    opacity: 0.35;
-    transform: scale(0.99);
-  }
-  50% {
-    opacity: 0.85;
-    transform: scale(1.01);
-  }
-}
-
-@keyframes aiScanLaser {
-  0% {
-    top: 0%;
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 0.9;
-  }
-  100% {
-    top: 100%;
-    opacity: 0.2;
-  }
-}
-
 .shimmer-loading {
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(204, 255, 0, 0.06) 50%, rgba(255, 255, 255, 0.02) 75%);
+  background: linear-gradient(90deg, #1E2226 25%, #262C32 50%, #1E2226 75%);
   background-size: 200% 100%;
-  animation: shimmerEffect 2s infinite;
+  animation: shimmerEffect 1.8s infinite;
 }
 
-.ai-thinking-glow {
-  animation: aiThinkingPulse 2.4s ease-in-out infinite;
-}
-
-.ai-scan-laser {
-  animation: aiScanLaser 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-}
-
-/* Custom Scrollbar */
+/* Clean Dark Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #07090d;
+  background: #101214;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: #30363D;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(204, 255, 0, 0.45);
+  background: #4B5563;
 }
 
-/* Custom Hide Scrollbar Utility */
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
@@ -334,7 +268,3 @@
 .ring-accent {
   --tw-ring-color: var(--accent-ring);
 }
-.glow-accent {
-  box-shadow: 0 0 20px var(--accent-glow);
-}
-

@@ -6,7 +6,6 @@ import {
   Mail,
   Lock,
   ShieldCheck,
-  Sparkles,
   CheckCircle2,
   LogIn,
   UserPlus,
@@ -14,11 +13,10 @@ import {
   EyeOff,
   LogOut,
   AlertCircle,
-  KeyRound,
   ArrowLeft,
+  RotateCw,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { UserProfile } from "../types";
 
 interface AuthModalProps {
   onClose: () => void;
@@ -27,11 +25,12 @@ interface AuthModalProps {
   onSignupSuccess?: () => void;
 }
 
-export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast, onSignupSuccess }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark: _isDark, addToast, onSignupSuccess }) => {
   const {
     user,
     signInWithEmail,
     signUpWithEmail,
+    resendVerificationEmail,
     signInWithGoogle,
     signOut,
     isConfigured,
@@ -53,6 +52,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isUnconfirmedUser, setIsUnconfirmedUser] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
 
   useEffect(() => {
     if (isRecoveryMode) {
@@ -60,10 +61,81 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
     }
   }, [isRecoveryMode]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const validateEmailFormat = (emailStr: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailStr.trim());
+  };
+
+  const handleModeChange = (newMode: "login" | "register" | "forgot_password" | "reset_password") => {
+    setAuthMode(newMode);
     setErrorMessage(null);
     setSuccessMessage(null);
+    setIsUnconfirmedUser(false);
+  };
+
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      setErrorMessage("Please enter your email address to resend verification.");
+      return;
+    }
+    setResendingVerification(true);
+    setErrorMessage(null);
+    try {
+      const res = await resendVerificationEmail(email);
+      if (res.error) {
+        setErrorMessage(res.error);
+      } else {
+        setSuccessMessage(`A new verification link has been sent to ${email.trim()}. Please check your inbox.`);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to resend verification email.");
+    } finally {
+      setResendingVerification(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setIsUnconfirmedUser(false);
+
+    // Validation checks
+    if (authMode !== "reset_password" && !validateEmailFormat(email)) {
+      setErrorMessage("Please enter a valid email address (e.g., name@example.com).");
+      return;
+    }
+
+    if (authMode === "register" || authMode === "login" || authMode === "reset_password") {
+      if (!password) {
+        setErrorMessage("Password cannot be empty.");
+        return;
+      }
+      if (password.length < 6) {
+        setErrorMessage("Password must be at least 6 characters long.");
+        return;
+      }
+    }
+
+    if (authMode === "register") {
+      if (!name.trim()) {
+        setErrorMessage("Please enter your full name.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setErrorMessage("Passwords do not match. Please re-enter.");
+        return;
+      }
+    }
+
+    if (authMode === "reset_password") {
+      if (password !== confirmPassword) {
+        setErrorMessage("Passwords do not match. Please re-enter.");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -71,6 +143,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
         const res = await signInWithEmail(email, password);
         if (res.error) {
           setErrorMessage(res.error);
+          if (res.isUnconfirmedEmail) {
+            setIsUnconfirmedUser(true);
+          }
         } else {
           if (addToast) addToast({ title: "Signed In Successfully", type: "success" });
           onClose();
@@ -79,6 +154,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
         const res = await signUpWithEmail(email, password, name);
         if (res.error) {
           setErrorMessage(res.error);
+        } else if (res.requiresVerification) {
+          setSuccessMessage(
+            res.message ||
+              "Registration successful! A verification email has been sent to your address. Please verify your email before logging in."
+          );
+          if (addToast) {
+            addToast({
+              title: "Verification Email Sent",
+              description: "Please check your inbox to confirm your account.",
+              type: "success",
+            });
+          }
+          // Clear inputs but stay on message
+          setPassword("");
+          setConfirmPassword("");
         } else {
           if (addToast) addToast({ title: "Account Created & Signed In", type: "success" });
           onClose();
@@ -87,17 +177,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
           }
         }
       } else if (authMode === "forgot_password") {
-        if (!email.trim()) {
-          setErrorMessage("Please enter your account email address.");
-          setIsSubmitting(false);
-          return;
-        }
         const res = await resetPassword(email);
         if (res.error) {
           setErrorMessage(res.error);
         } else {
           setSuccessMessage(
-            `Password reset link sent to ${email.trim()}. Please check your email inbox to reset your password.`
+            `Password reset link sent to ${email.trim()}. Please check your email inbox to proceed.`
           );
           if (addToast) {
             addToast({
@@ -108,22 +193,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
           }
         }
       } else if (authMode === "reset_password") {
-        if (password.length < 6) {
-          setErrorMessage("Password must be at least 6 characters long.");
-          setIsSubmitting(false);
-          return;
-        }
-        if (password !== confirmPassword) {
-          setErrorMessage("Passwords do not match. Please re-enter.");
-          setIsSubmitting(false);
-          return;
-        }
         const res = await changePassword(password);
         if (res.error) {
           setErrorMessage(res.error);
         } else {
           setIsRecoveryMode(false);
-          setSuccessMessage("Password successfully updated! You can now access your vault.");
+          setSuccessMessage("Password successfully updated! You can now sign in with your new password.");
           if (addToast) {
             addToast({
               title: "Password Updated",
@@ -137,13 +212,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
         }
       }
     } catch (err: any) {
-      setErrorMessage(err.message || "Authentication failed.");
+      setErrorMessage(err.message || "Authentication request failed.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleGoogleAuth = async () => {
+    if (isSubmitting) return;
     setErrorMessage(null);
     setSuccessMessage(null);
     setIsSubmitting(true);
@@ -156,7 +232,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
         onClose();
       }
     } catch (err: any) {
-      setErrorMessage(err.message || "Google auth error");
+      setErrorMessage(err.message || "Google authentication error");
     } finally {
       setIsSubmitting(false);
     }
@@ -164,72 +240,79 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
 
   const handleSignOut = async () => {
     await signOut();
-    if (addToast) addToast({ title: "Signed Out of Vault", type: "info" });
+    if (addToast) addToast({ title: "Signed Out", type: "info" });
     onClose();
   };
 
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-      <div
-        className={`relative w-full max-w-md rounded-3xl border p-6 space-y-6 shadow-2xl transition-all ${
-          isDark ? "bg-slate-950 border-slate-800 text-slate-100" : "bg-white border-slate-200 text-slate-900"
-        }`}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
+      <div className="relative w-full max-w-md rounded-2xl border border-[#30363D] bg-[#171A1D] text-[#F5F7FA] p-6 space-y-5 shadow-2xl transition-all">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-800/40 text-slate-400 hover:text-slate-200"
+          type="button"
+          aria-label="Close modal"
+          className="absolute top-4 right-4 p-1.5 rounded-lg text-[#A7B0BA] hover:text-[#F5F7FA] hover:bg-[#1E2226] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Brand Header */}
         <div className="flex items-center gap-3">
-          <SnapFindLogo className="w-12 h-12 rounded-2xl object-cover border-2 border-blue-500/40 shadow-lg shadow-blue-500/25 ring-2 ring-blue-500/20 bg-slate-900" />
+          <SnapFindLogo className="w-10 h-10 rounded-xl object-contain border border-[#30363D] bg-[#101214]" />
           <div>
-            <h2 className="text-lg font-bold">
+            <h2 className="text-base font-semibold text-[#F5F7FA]">
               {authMode === "forgot_password"
                 ? "Reset Password"
                 : authMode === "reset_password"
                 ? "Set New Password"
-                : "SnapFind Account"}
+                : authMode === "register"
+                ? "Create Account"
+                : "Sign In"}
             </h2>
-            <p className="text-xs opacity-70">
+            <p className="text-xs text-[#A7B0BA]">
               {user?.isLoggedIn
-                ? `Logged in as ${user.email}`
+                ? `Active account: ${user.email}`
                 : authMode === "forgot_password"
-                ? "We will email you a secure recovery link"
+                ? "Enter your email to receive a recovery link"
                 : authMode === "reset_password"
-                ? "Enter your new account password"
+                ? "Choose a strong password for your vault"
+                : authMode === "register"
+                ? "Free account with private local storage"
                 : isConfigured
-                ? "Live Supabase Cloud Auth Active"
-                : "Demo Persistent Auth Mode"}
+                ? "Secure authentication via Supabase"
+                : "Local storage mode active"}
             </p>
           </div>
         </div>
 
         {user?.isLoggedIn && authMode !== "reset_password" ? (
           /* User Logged In Profile Card */
-          <div className="space-y-4 pt-2">
-            <div className="p-4 rounded-2xl border bg-slate-900/60 border-slate-800 flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-400 font-bold text-lg flex items-center justify-center shrink-0">
+          <div className="space-y-4 pt-1">
+            <div className="p-4 rounded-xl border border-[#30363D] bg-[#1E2226] flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full bg-[#171A1D] border border-[#30363D] text-[#00D4FF] font-semibold text-base flex items-center justify-center shrink-0">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-bold text-sm text-slate-100 truncate">{user.name}</h3>
-                <p className="text-xs text-slate-400 truncate">{user.email}</p>
-                <div className="flex items-center gap-1 text-[10px] text-emerald-400 mt-1">
+                <h3 className="font-semibold text-sm text-[#F5F7FA] truncate">{user.name}</h3>
+                <p className="text-xs text-[#A7B0BA] truncate">{user.email}</p>
+                <div className="flex items-center gap-1.5 text-xs text-[#22C55E] mt-1 font-medium">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Pro Vault Session Active</span>
+                  <span>Session Active ({user.plan || "Free"})</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={handleSignOut}
-              className="w-full py-2.5 rounded-xl border border-rose-800/40 text-rose-400 hover:bg-rose-950/30 text-xs font-semibold flex items-center justify-center gap-2 transition-all"
+              type="button"
+              className="w-full py-2.5 rounded-xl border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444]/10 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
-              <span>Sign Out of Session</span>
+              <span>Sign Out of Account</span>
             </button>
           </div>
         ) : (
@@ -237,32 +320,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
           <div className="space-y-4">
             {/* Tab Switcher for login / register */}
             {(authMode === "login" || authMode === "register") && (
-              <div className="grid grid-cols-2 p-1 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs font-semibold">
+              <div className="grid grid-cols-2 p-1 rounded-xl bg-[#1E2226] border border-[#30363D] text-xs font-medium">
                 <button
-                  onClick={() => {
-                    setAuthMode("login");
-                    setErrorMessage(null);
-                    setSuccessMessage(null);
-                  }}
-                  className={`py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                  type="button"
+                  onClick={() => handleModeChange("login")}
+                  className={`py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     authMode === "login"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-[#171A1D] text-[#00D4FF] font-semibold border border-[#30363D]"
+                      : "text-[#A7B0BA] hover:text-[#F5F7FA]"
                   }`}
                 >
                   <LogIn className="w-3.5 h-3.5" />
                   <span>Sign In</span>
                 </button>
                 <button
-                  onClick={() => {
-                    setAuthMode("register");
-                    setErrorMessage(null);
-                    setSuccessMessage(null);
-                  }}
-                  className={`py-2 rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                  type="button"
+                  onClick={() => handleModeChange("register")}
+                  className={`py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     authMode === "register"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "text-slate-400 hover:text-slate-200"
+                      ? "bg-[#171A1D] text-[#00D4FF] font-semibold border border-[#30363D]"
+                      : "text-[#A7B0BA] hover:text-[#F5F7FA]"
                   }`}
                 >
                   <UserPlus className="w-3.5 h-3.5" />
@@ -275,26 +352,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
             {authMode === "forgot_password" && (
               <button
                 type="button"
-                onClick={() => {
-                  setAuthMode("login");
-                  setErrorMessage(null);
-                  setSuccessMessage(null);
-                }}
-                className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors font-medium"
+                onClick={() => handleModeChange("login")}
+                className="inline-flex items-center gap-1.5 text-xs text-[#00D4FF] hover:text-[#00B8D9] transition-colors font-medium cursor-pointer"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Sign In</span>
               </button>
             )}
 
-            {/* Google OAuth Button (only in login/register) */}
+            {/* Google OAuth Button */}
             {(authMode === "login" || authMode === "register") && (
               <>
                 <button
                   type="button"
                   onClick={handleGoogleAuth}
                   disabled={isSubmitting}
-                  className="w-full py-2.5 px-4 rounded-xl border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-sm"
+                  className="w-full py-2.5 px-4 rounded-xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] text-[#F5F7FA] font-medium text-xs flex items-center justify-center gap-2.5 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24">
                     <path
@@ -314,13 +387,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                     />
                   </svg>
-                  <span>Continue with Google Account</span>
+                  <span>Continue with Google</span>
                 </button>
 
-                <div className="relative flex items-center justify-center my-2">
-                  <div className="border-t border-slate-800 w-full" />
-                  <span className="bg-slate-950 px-2 text-[10px] font-bold text-slate-500 uppercase">
-                    Or With Email
+                <div className="relative flex items-center justify-center my-1">
+                  <div className="border-t border-[#30363D] w-full" />
+                  <span className="bg-[#171A1D] px-2 text-[10px] font-semibold text-[#A7B0BA] uppercase tracking-wider">
+                    Or with email
                   </span>
                 </div>
               </>
@@ -328,36 +401,60 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
 
             {/* Error banner */}
             {errorMessage && (
-              <div className="p-3 rounded-xl border border-rose-800/40 bg-rose-950/30 text-rose-300 text-xs flex items-start gap-2">
-                <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
-                <span>{errorMessage}</span>
+              <div className="p-3 rounded-xl border border-[#EF4444]/40 bg-[#EF4444]/10 text-[#EF4444] text-xs flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1.5">
+                  <p>{errorMessage}</p>
+                  {isUnconfirmedUser && (
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendingVerification}
+                      className="inline-flex items-center gap-1 text-xs text-[#00D4FF] hover:underline font-medium cursor-pointer"
+                    >
+                      <RotateCw className={`w-3 h-3 ${resendingVerification ? "animate-spin" : ""}`} />
+                      <span>{resendingVerification ? "Sending link..." : "Resend confirmation email"}</span>
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Success banner */}
             {successMessage && (
-              <div className="p-3 rounded-xl border border-emerald-800/40 bg-emerald-950/30 text-emerald-300 text-xs flex items-start gap-2">
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400 mt-0.5" />
-                <span>{successMessage}</span>
+              <div className="p-3 rounded-xl border border-[#22C55E]/40 bg-[#22C55E]/10 text-[#22C55E] text-xs flex items-start gap-2.5">
+                <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1.5">
+                  <p>{successMessage}</p>
+                  {authMode === "register" && (
+                    <button
+                      type="button"
+                      onClick={() => handleModeChange("login")}
+                      className="text-xs text-[#00D4FF] hover:underline font-semibold cursor-pointer"
+                    >
+                      Go to Sign In
+                    </button>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Auth Form */}
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              {/* Name field (register only) */}
               {authMode === "register" && (
                 <div className="space-y-1 text-xs">
-                  <label className="font-semibold text-slate-400">Full Name</label>
+                  <label className="font-medium text-[#A7B0BA]">Full Name</label>
                   <div className="relative">
-                    <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#A7B0BA]" />
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Alex Morgan"
+                      disabled={isSubmitting}
                       required
-                      className={`w-full pl-9 pr-3 py-2 text-xs rounded-xl border outline-none ${
-                        isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-slate-100 border-slate-200"
-                      }`}
+                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#30363D] bg-[#1E2226] text-[#F5F7FA] placeholder-[#6B7280] focus:border-[#00D4FF] focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -366,18 +463,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
               {/* Email field (for login, register, forgot_password) */}
               {authMode !== "reset_password" && (
                 <div className="space-y-1 text-xs">
-                  <label className="font-semibold text-slate-400">Email Address</label>
+                  <label className="font-medium text-[#A7B0BA]">Email Address</label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#A7B0BA]" />
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@example.com"
+                      disabled={isSubmitting}
                       required
-                      className={`w-full pl-9 pr-3 py-2 text-xs rounded-xl border outline-none ${
-                        isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-slate-100 border-slate-200"
-                      }`}
+                      className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#30363D] bg-[#1E2226] text-[#F5F7FA] placeholder-[#6B7280] focus:border-[#00D4FF] focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -387,37 +483,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
               {(authMode === "login" || authMode === "register") && (
                 <div className="space-y-1 text-xs">
                   <div className="flex items-center justify-between">
-                    <label className="font-semibold text-slate-400">Password</label>
+                    <label className="font-medium text-[#A7B0BA]">Password</label>
                     {authMode === "login" && (
                       <button
                         type="button"
-                        onClick={() => {
-                          setAuthMode("forgot_password");
-                          setErrorMessage(null);
-                          setSuccessMessage(null);
-                        }}
-                        className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
+                        onClick={() => handleModeChange("forgot_password")}
+                        className="text-[11px] text-[#00D4FF] hover:text-[#00B8D9] transition-colors cursor-pointer"
                       >
                         Forgot password?
                       </button>
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#A7B0BA]" />
                     <input
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
+                      placeholder="At least 6 characters"
+                      disabled={isSubmitting}
                       required
-                      className={`w-full pl-9 pr-9 py-2 text-xs rounded-xl border outline-none ${
-                        isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-slate-100 border-slate-200"
-                      }`}
+                      className="w-full pl-9 pr-9 py-2.5 text-xs rounded-xl border border-[#30363D] bg-[#1E2226] text-[#F5F7FA] placeholder-[#6B7280] focus:border-[#00D4FF] focus:outline-none transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A7B0BA] hover:text-[#F5F7FA] cursor-pointer"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -425,78 +516,70 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
                 </div>
               )}
 
-              {/* Password fields for reset_password */}
-              {authMode === "reset_password" && (
-                <>
-                  <div className="space-y-1 text-xs">
-                    <label className="font-semibold text-slate-400">New Password</label>
-                    <div className="relative">
-                      <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="At least 6 characters"
-                        required
-                        className={`w-full pl-9 pr-9 py-2 text-xs rounded-xl border outline-none ${
-                          isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-slate-100 border-slate-200"
-                        }`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
+              {/* Confirm Password field (for register and reset_password) */}
+              {(authMode === "register" || authMode === "reset_password") && (
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <label className="font-medium text-[#A7B0BA]">
+                      {authMode === "register" ? "Confirm Password" : "Confirm New Password"}
+                    </label>
+                    {passwordsMatch && (
+                      <span className="text-[11px] text-[#22C55E] flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Matches
+                      </span>
+                    )}
+                    {passwordsMismatch && (
+                      <span className="text-[11px] text-[#EF4444]">
+                        Does not match
+                      </span>
+                    )}
                   </div>
-
-                  <div className="space-y-1 text-xs">
-                    <label className="font-semibold text-slate-400">Confirm New Password</label>
-                    <div className="relative">
-                      <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                      <input
-                        type={showConfirmPassword ? "text" : "password"}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Re-enter new password"
-                        required
-                        className={`w-full pl-9 pr-9 py-2 text-xs rounded-xl border outline-none ${
-                          isDark ? "bg-slate-900 border-slate-800 text-slate-100" : "bg-slate-100 border-slate-200"
-                        }`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-                      >
-                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#A7B0BA]" />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Re-enter password"
+                      disabled={isSubmitting}
+                      required
+                      className={`w-full pl-9 pr-9 py-2.5 text-xs rounded-xl border bg-[#1E2226] text-[#F5F7FA] placeholder-[#6B7280] focus:outline-none transition-colors ${
+                        passwordsMismatch
+                          ? "border-[#EF4444] focus:border-[#EF4444]"
+                          : "border-[#30363D] focus:border-[#00D4FF]"
+                      }`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A7B0BA] hover:text-[#F5F7FA] cursor-pointer"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
-                </>
+                </div>
               )}
 
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2.5 px-4 rounded-xl bg-[#00D4FF] hover:bg-[#00B8D9] text-[#101214] font-semibold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-1"
               >
                 {isSubmitting ? (
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="flex items-center gap-2">
+                    <span className="w-3.5 h-3.5 border-2 border-[#101214]/30 border-t-[#101214] rounded-full animate-spin" />
                     <span>Processing...</span>
                   </span>
                 ) : (
                   <span>
                     {authMode === "login"
-                      ? "Sign In to Vault"
+                      ? "Sign In"
                       : authMode === "register"
-                      ? "Register Free Account"
+                      ? "Create Free Account"
                       : authMode === "forgot_password"
                       ? "Send Password Reset Link"
-                      : "Update Account Password"}
+                      : "Save New Password"}
                   </span>
                 )}
               </button>
@@ -507,4 +590,3 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, isDark, addToast,
     </div>
   );
 };
-

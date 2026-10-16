@@ -33,7 +33,6 @@ import {
 import { ScreenshotItem, CategoryType, CollectionItem, SearchHistoryItem } from "../types";
 import { NavViewType } from "./BottomNavigation";
 import { motion } from "motion/react";
-import { UsageLimitBanner, ProBadge, FounderBadge } from "./subscription/UpgradePrompt";
 import { YourUsageCard } from "./subscription/YourUsageCard";
 import { UsageModal } from "./subscription/UsageModal";
 import {
@@ -174,14 +173,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     return sorted.slice(0, 8);
   }, [searchHistory, screenshots]);
 
-  // 7. Categories Breakdown & Chart Data with SnapFind Color System
+  // 7. Categories Breakdown with Electric Cyan Accent Palette
   const categoriesList: { name: CategoryType; label: string; icon: any; color: string; fill: string }[] = [
-    { name: "Receipt & Invoice", label: "Receipt & Invoice", icon: CreditCard, color: "text-[#CCFF00]", fill: "#CCFF00" },
-    { name: "Passport", label: "Passport", icon: Bookmark, color: "text-[#00FF66]", fill: "#00FF66" },
-    { name: "Electricity Bill", label: "Electricity Bill", icon: CreditCard, color: "text-[#FF6600]", fill: "#FF6600" },
-    { name: "Recipe", label: "Recipe", icon: Utensils, color: "text-amber-400", fill: "#F59E0B" },
-    { name: "QR Code", label: "QR Code", icon: QrCode, color: "text-purple-400", fill: "#A855F7" },
-    { name: "Ticket & Travel", label: "Ticket & Travel", icon: FileText, color: "text-emerald-400", fill: "#10B981" },
+    { name: "Receipt & Invoice", label: "Receipt & Invoice", icon: CreditCard, color: "text-[#00D4FF]", fill: "#00D4FF" },
+    { name: "Passport", label: "Passport", icon: Bookmark, color: "text-[#22C55E]", fill: "#22C55E" },
+    { name: "Electricity Bill", label: "Electricity Bill", icon: CreditCard, color: "text-[#F59E0B]", fill: "#F59E0B" },
+    { name: "Recipe", label: "Recipe", icon: Utensils, color: "text-[#00D4FF]", fill: "#00D4FF" },
+    { name: "QR Code", label: "QR Code", icon: QrCode, color: "text-[#A7B0BA]", fill: "#A7B0BA" },
+    { name: "Ticket & Travel", label: "Ticket & Travel", icon: FileText, color: "text-[#22C55E]", fill: "#22C55E" },
   ];
 
   const categoryStats = useMemo(() => {
@@ -233,187 +232,173 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     currentHour < 12 ? "Good Morning" : currentHour < 18 ? "Good Afternoon" : "Good Evening";
 
   return (
-    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 pb-12 w-full max-w-7xl mx-auto">
-      {/* Dynamic Header with Neural 3D Canvas */}
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200 pb-12 w-full max-w-7xl mx-auto">
+      {/* Dynamic Header */}
       <motion.div
-        initial={{ opacity: 0, y: -15 }}
+        initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="p-5 sm:p-8 rounded-3xl border border-white/[0.08] bg-[#0D1117]/90 backdrop-blur-2xl grid grid-cols-1 lg:grid-cols-12 gap-6 shadow-2xl shadow-black/70 relative overflow-hidden min-w-0 w-full"
+        transition={{ duration: 0.25 }}
+        className="p-5 sm:p-7 rounded-2xl border border-[#30363D] bg-[#171A1D] grid grid-cols-1 lg:grid-cols-12 gap-6 relative overflow-hidden min-w-0 w-full shadow-lg"
       >
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#CCFF00]/[0.05] rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#00FF66]/[0.04] rounded-full blur-3xl pointer-events-none" />
-
         <div className="w-full lg:col-span-7 space-y-4 relative z-10 min-w-0">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <SnapFindLogo className="w-12 h-12 rounded-2xl object-contain border border-white/[0.08] shadow-xl bg-[#07090D] shrink-0 ring-2 ring-[#CCFF00]/30" />
-              <div className="absolute -bottom-1 -right-1 p-1 rounded-full bg-[#CCFF00] text-[#07090D] shadow-lg">
-                <Sparkles className="w-3 h-3" />
+              <SnapFindLogo className="w-11 h-11 rounded-xl object-contain border border-[#30363D] bg-[#101214] shrink-0" />
+              <div className="absolute -bottom-1 -right-1 p-0.5 rounded-full bg-[#00D4FF] text-[#101214]">
+                <Zap className="w-3 h-3 fill-current" />
               </div>
             </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-[#F8FAFC] flex items-center gap-2 truncate">
-                <span>{greeting}, Intelligence Hub</span>
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#F5F7FA] flex items-center gap-2 truncate">
+                <span>{greeting}, Visual Vault</span>
               </h1>
-              <p className="text-xs font-bold text-[#CCFF00] flex items-center gap-1.5 mt-0.5 truncate">
-                <Activity className="w-3.5 h-3.5 animate-pulse text-[#00FF66] shrink-0" />
-                <span className="truncate">Gemini Vision AI Engine • Real-time Monitoring</span>
+              <p className="text-xs font-medium text-[#00D4FF] flex items-center gap-1.5 mt-0.5 truncate">
+                <Activity className="w-3.5 h-3.5 text-[#00D4FF] shrink-0" />
+                <span>SnapFind AI Vision Engine Active</span>
               </p>
             </div>
           </div>
 
-          <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed max-w-xl font-normal">
-            Unified analytical dashboard for your screenshot knowledge base. Automated OCR text extraction, key fact indexing, category clustering, and instant retrieval metrics.
+          <p className="text-xs sm:text-sm text-[#A7B0BA] leading-relaxed max-w-xl font-normal">
+            Your personal visual memory engine is indexing, extracting OCR text, and clustering key screenshot insights in real time.
           </p>
 
-          <div className="flex flex-wrap items-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-1">
             <button
-              onClick={() => onNavigate("import")}
-              className="px-4 sm:px-5 py-2.5 rounded-xl bg-[#CCFF00] hover:bg-[#D9FF33] text-[#07090D] font-bold text-xs sm:text-sm shadow-[0_0_20px_rgba(204,255,0,0.25)] flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+              onClick={() => onNavigate("gallery")}
+              className="px-4 py-2.5 rounded-xl bg-[#00D4FF] hover:bg-[#00B8D9] text-[#101214] font-semibold text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer"
             >
               <Upload className="w-4 h-4" />
-              <span>Index New Screenshot</span>
+              <span>Upload Screenshots</span>
             </button>
             <button
               onClick={() => onNavigate("search")}
-              className="px-4 sm:px-5 py-2.5 rounded-xl border border-white/[0.08] bg-[#121821] hover:bg-[#182230] text-[#F8FAFC] font-bold text-xs sm:text-sm flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] text-[#F5F7FA] font-medium text-xs sm:text-sm flex items-center gap-2 transition-colors cursor-pointer"
             >
-              <Search className="w-4 h-4 text-[#CCFF00]" />
-              <span>Search Vault</span>
+              <Search className="w-4 h-4 text-[#00D4FF]" />
+              <span>Natural Search</span>
             </button>
           </div>
         </div>
 
-        {/* 3D Interactive AI Sphere Canvas */}
-        <div className="w-full lg:col-span-5 relative flex items-center justify-center p-2 rounded-2xl bg-[#07090D] border border-white/[0.08] overflow-hidden shadow-inner min-w-0">
-          <Ai3dCanvas height="h-48 sm:h-56" />
+        {/* Neural 3D Canvas Visualizer */}
+        <div className="w-full lg:col-span-5 relative flex items-center justify-center p-2 rounded-xl bg-[#101214] border border-[#30363D] overflow-hidden min-w-0">
+          <Ai3dCanvas height={150} interactive={true} />
         </div>
       </motion.div>
 
-      {/* Primary Key Metrics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* 1. Total Screenshots */}
+      {/* Row 1: KPI Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        {/* Total Screenshots */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.05 }}
-          className="p-5 rounded-3xl border border-white/[0.08] bg-[#121821] hover:bg-[#182230] hover:border-[#CCFF00]/40 transition-all duration-300 hover:-translate-y-1 shadow-xl shadow-black/50 relative overflow-hidden group"
+          transition={{ duration: 0.25, delay: 0.05 }}
+          className="p-5 rounded-2xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] hover:border-[#00D4FF] transition-all relative overflow-hidden group"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <HardDrive className="w-20 h-20 text-[#CCFF00]" />
-          </div>
           <div className="flex items-center gap-3.5 mb-3">
-            <div className="p-3 rounded-2xl bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00] shrink-0">
+            <div className="p-2.5 rounded-xl bg-[#171A1D] border border-[#30363D] text-[#00D4FF] shrink-0">
               <HardDrive className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Total Screenshots</div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#F8FAFC] tracking-tight mt-0.5">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-[#A7B0BA]">Total Screenshots</div>
+              <div className="text-2xl sm:text-3xl font-bold font-mono text-[#F5F7FA] tracking-tight mt-0.5">
                 {totalScreenshots}
               </div>
             </div>
           </div>
-          <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs">
-            <span className="text-[#00FF66] font-semibold flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Fully Indexed
+          <div className="pt-2 border-t border-[#30363D] flex items-center justify-between text-xs">
+            <span className="text-[#22C55E] font-medium flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Synchronized
             </span>
-            <span className="text-[#64748B] font-mono text-[11px]">Vault Active</span>
+            <span className="text-[#A7B0BA] font-mono text-[11px]">Vault Active</span>
           </div>
         </motion.div>
 
-        {/* 2. Indexed Today */}
+        {/* Indexed Today */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-          className="p-5 rounded-3xl border border-white/[0.08] bg-[#121821] hover:bg-[#182230] hover:border-[#FF6600]/40 transition-all duration-300 hover:-translate-y-1 shadow-xl shadow-black/50 relative overflow-hidden group"
+          transition={{ duration: 0.25, delay: 0.1 }}
+          className="p-5 rounded-2xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] hover:border-[#00D4FF] transition-all relative overflow-hidden group"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Clock className="w-20 h-20 text-[#FF6600]" />
-          </div>
           <div className="flex items-center gap-3.5 mb-3">
-            <div className="p-3 rounded-2xl bg-[#FF6600]/10 border border-[#FF6600]/20 text-[#FF6600] shrink-0">
+            <div className="p-2.5 rounded-xl bg-[#171A1D] border border-[#30363D] text-[#00D4FF] shrink-0">
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Indexed Today</div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#F8FAFC] tracking-tight mt-0.5 flex items-center gap-2">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-[#A7B0BA]">Indexed Today</div>
+              <div className="text-2xl sm:text-3xl font-bold font-mono text-[#F5F7FA] tracking-tight mt-0.5 flex items-center gap-2">
                 <span>{indexedToday}</span>
                 {indexedToday > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF6600]/20 text-[#FF6600] border border-[#FF6600]/30 shadow-[0_0_8px_rgba(255,102,0,0.3)]">
-                    +New
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/30">
+                    Active
                   </span>
                 )}
               </div>
             </div>
           </div>
-          <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs">
-            <span className="text-[#FF6600] font-semibold text-[11px] flex items-center gap-1">
-              <Zap className="w-3.5 h-3.5" /> High Precision OCR
+          <div className="pt-2 border-t border-[#30363D] flex items-center justify-between text-xs">
+            <span className="text-[#00D4FF] font-medium text-[11px] flex items-center gap-1">
+              <Activity className="w-3.5 h-3.5" /> Pipeline Live
             </span>
-            <span className="text-[#64748B] font-mono text-[11px]">Today</span>
+            <span className="text-[#A7B0BA] font-mono text-[11px]">Today</span>
           </div>
         </motion.div>
 
-        {/* 3. Favorite Count */}
+        {/* Favorite Count */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.15 }}
+          transition={{ duration: 0.25, delay: 0.15 }}
           onClick={() => onNavigate("favorites")}
-          className="p-5 rounded-3xl border border-white/[0.08] bg-[#121821] hover:bg-[#182230] hover:border-rose-500/40 transition-all duration-300 hover:-translate-y-1 shadow-xl shadow-black/50 relative overflow-hidden group cursor-pointer"
+          className="p-5 rounded-2xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] hover:border-[#00D4FF] transition-all relative overflow-hidden group cursor-pointer"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Heart className="w-20 h-20 text-rose-400" />
-          </div>
           <div className="flex items-center gap-3.5 mb-3">
-            <div className="p-3 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 shrink-0">
-              <Heart className="w-5 h-5 fill-rose-500/30" />
+            <div className="p-2.5 rounded-xl bg-[#171A1D] border border-[#30363D] text-[#F59E0B] shrink-0">
+              <Heart className="w-5 h-5 fill-current" />
             </div>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Favorite Count</div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-rose-300 tracking-tight mt-0.5">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-[#A7B0BA]">Favorite Count</div>
+              <div className="text-2xl sm:text-3xl font-bold font-mono text-[#F5F7FA] tracking-tight mt-0.5">
                 {favoriteCount}
               </div>
             </div>
           </div>
-          <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs">
-            <span className="text-rose-400 font-semibold text-[11px] flex items-center gap-1">
-              <FolderHeart className="w-3.5 h-3.5" /> Saved Items
+          <div className="pt-2 border-t border-[#30363D] flex items-center justify-between text-xs">
+            <span className="text-[#F59E0B] font-medium text-[11px] flex items-center gap-1">
+              <FolderHeart className="w-3.5 h-3.5" /> Starred Snaps
             </span>
-            <span className="text-[#64748B] font-mono text-[11px] flex items-center gap-1 group-hover:text-rose-300">
-              View All <ArrowRight className="w-3 h-3" />
+            <span className="text-[#A7B0BA] font-mono text-[11px] flex items-center gap-1 group-hover:text-[#00D4FF]">
+              <span>View</span>
+              <ArrowRight className="w-3 h-3" />
             </span>
           </div>
         </motion.div>
 
-        {/* 4. Average OCR Accuracy */}
+        {/* Avg OCR Accuracy */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          className="p-5 rounded-3xl border border-white/[0.08] bg-[#121821] hover:bg-[#182230] hover:border-[#00FF66]/40 transition-all duration-300 hover:-translate-y-1 shadow-xl shadow-black/50 relative overflow-hidden group"
+          transition={{ duration: 0.25, delay: 0.2 }}
+          className="p-5 rounded-2xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] hover:border-[#00D4FF] transition-all relative overflow-hidden group"
         >
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <ShieldCheck className="w-20 h-20 text-[#00FF66]" />
-          </div>
           <div className="flex items-center gap-3.5 mb-3">
-            <div className="p-3 rounded-2xl bg-[#00FF66]/10 border border-[#00FF66]/20 text-[#00FF66] shrink-0">
+            <div className="p-2.5 rounded-xl bg-[#171A1D] border border-[#30363D] text-[#22C55E] shrink-0">
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <div className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">Avg OCR Accuracy</div>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#00FF66] tracking-tight mt-0.5">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-[#A7B0BA]">Avg OCR Accuracy</div>
+              <div className="text-2xl sm:text-3xl font-bold font-mono text-[#22C55E] tracking-tight mt-0.5">
                 {avgOcrAccuracy}%
               </div>
             </div>
           </div>
-          <div className="pt-2 border-t border-white/[0.05] flex items-center justify-between text-xs">
-            <span className="text-[#00FF66] font-semibold text-[11px] flex items-center gap-1">
+          <div className="pt-2 border-t border-[#30363D] flex items-center justify-between text-xs">
+            <span className="text-[#22C55E] font-medium text-[11px] flex items-center gap-1">
               <Award className="w-3.5 h-3.5" /> High Confidence
             </span>
-            <span className="text-[#64748B] font-mono text-[11px]">Vision AI</span>
+            <span className="text-[#A7B0BA] font-mono text-[11px]">Vision AI</span>
           </div>
         </motion.div>
       </div>
@@ -422,67 +407,67 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Largest Collection Card */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.25 }}
-          className="lg:col-span-5 p-6 rounded-3xl border border-white/[0.08] bg-[#121821] flex flex-col justify-between shadow-2xl relative overflow-hidden group"
+          transition={{ duration: 0.25, delay: 0.25 }}
+          className="lg:col-span-5 p-6 rounded-2xl border border-[#30363D] bg-[#1E2226] flex flex-col justify-between relative overflow-hidden group"
         >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-[#CCFF00]/10 border border-[#CCFF00]/20 text-[#CCFF00]">
+                <div className="p-2 rounded-xl bg-[#171A1D] border border-[#30363D] text-[#00D4FF]">
                   <Layers className="w-4 h-4" />
                 </div>
-                <h3 className="font-extrabold text-base text-[#F8FAFC]">Largest Collection</h3>
+                <h3 className="font-bold text-base text-[#F5F7FA]">Largest Collection</h3>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/20">
                 Top Album
               </span>
             </div>
 
             {largestCollection ? (
               <div className="space-y-3.5 pt-1">
-                <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-white/[0.08] bg-[#07090D] group-hover:border-[#CCFF00]/40 transition-colors">
+                <div className="relative aspect-[16/9] rounded-xl overflow-hidden border border-[#30363D] bg-[#101214] group-hover:border-[#00D4FF] transition-colors">
                   {largestCollection.coverImageUrl ? (
                     <img
                       src={largestCollection.coverImageUrl}
                       alt={largestCollection.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#0D1117] text-slate-500">
+                    <div className="w-full h-full flex items-center justify-center bg-[#171A1D] text-[#A7B0BA]">
                       <Layers className="w-10 h-10" />
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                   <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
                     <div>
-                      <h4 className="font-extrabold text-base text-white tracking-tight drop-shadow">
+                      <h4 className="font-bold text-base text-white tracking-tight">
                         {largestCollection.name}
                       </h4>
-                      <p className="text-[11px] text-slate-300 line-clamp-1">
+                      <p className="text-[11px] text-[#A7B0BA] line-clamp-1">
                         {largestCollection.description || "Organized screenshot collection"}
                       </p>
                     </div>
-                    <span className="px-2.5 py-1 rounded-xl text-xs font-mono font-black bg-[#CCFF00] text-[#07090D] shadow-lg shrink-0">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-[#00D4FF] text-[#101214] shrink-0">
                       {largestCollection.itemCount || 0} items
                     </span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="p-6 rounded-2xl border border-dashed border-white/[0.08] text-center text-[#94A3B8] space-y-2">
-                <Layers className="w-8 h-8 mx-auto text-slate-600" />
+              <div className="p-6 rounded-xl border border-dashed border-[#30363D] text-center text-[#A7B0BA] space-y-2">
+                <Layers className="w-8 h-8 mx-auto text-[#6B7280]" />
                 <p className="text-xs">No custom collections created yet.</p>
               </div>
             )}
           </div>
 
-          <div className="pt-4 mt-4 border-t border-white/[0.05] flex items-center justify-between">
-            <span className="text-xs text-[#94A3B8]">Automatically synchronized by AI</span>
+          <div className="pt-4 mt-4 border-t border-[#30363D] flex items-center justify-between">
+            <span className="text-xs text-[#A7B0BA]">Automatically categorized</span>
             <button
               onClick={() => onNavigate("collections")}
-              className="text-xs font-bold text-[#CCFF00] flex items-center gap-1.5 hover:underline cursor-pointer"
+              className="text-xs font-semibold text-[#00D4FF] flex items-center gap-1.5 hover:underline cursor-pointer"
             >
               <span>Explore Collections</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -492,38 +477,38 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
         {/* Most Searched Keywords & Tag Cloud */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.35, delay: 0.3 }}
-          className="lg:col-span-7 p-6 rounded-3xl border border-white/[0.08] bg-[#121821] flex flex-col justify-between shadow-2xl space-y-4"
+          transition={{ duration: 0.25, delay: 0.3 }}
+          className="lg:col-span-7 p-6 rounded-2xl border border-[#30363D] bg-[#1E2226] flex flex-col justify-between space-y-4"
         >
           <div>
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-[#FF6600]/10 border border-[#FF6600]/20 text-[#FF6600]">
+                <div className="p-2 rounded-xl bg-[#171A1D] border border-[#30363D] text-[#00D4FF]">
                   <Flame className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-[#F8FAFC]">Most Searched Keywords</h3>
-                  <p className="text-xs text-[#94A3B8]">Top natural language search queries & extracted OCR concepts</p>
+                  <h3 className="font-bold text-base text-[#F5F7FA]">Frequent Search Terms</h3>
+                  <p className="text-xs text-[#A7B0BA]">Natural language queries & recognized OCR keywords</p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FF6600]/15 text-[#FF6600] border border-[#FF6600]/30 flex items-center gap-1">
-                <Sparkle className="w-3 h-3" /> Live Query Hits
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/20 flex items-center gap-1">
+                <Sparkle className="w-3 h-3" /> Live Hits
               </span>
             </div>
 
-            {/* Keyword Pills Interactive Tag Cloud */}
+            {/* Keyword Pills */}
             <div className="flex flex-wrap gap-2 pt-2">
               {mostSearchedKeywords.map((item) => (
                 <button
                   key={item.word}
                   onClick={() => onExecuteSearch(item.word)}
-                  className="group px-3.5 py-2 rounded-xl border border-white/[0.08] bg-[#0D1117] hover:bg-[#182230] hover:border-[#CCFF00]/40 text-xs font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="group px-3 py-1.5 rounded-xl border border-[#30363D] bg-[#171A1D] hover:bg-[#262C32] hover:border-[#00D4FF] text-xs font-medium transition-colors flex items-center gap-2 cursor-pointer active:scale-98"
                 >
-                  <Tag className="w-3 h-3 text-[#CCFF00] group-hover:scale-110 transition-transform" />
-                  <span className="text-slate-200 group-hover:text-white capitalize font-medium">{item.word}</span>
-                  <span className="px-1.5 py-0.5 rounded-lg bg-white/[0.06] font-mono text-[10px] text-[#CCFF00] font-bold">
+                  <Tag className="w-3 h-3 text-[#00D4FF]" />
+                  <span className="text-[#F5F7FA] capitalize font-medium">{item.word}</span>
+                  <span className="px-1.5 py-0.5 rounded-md bg-[#101214] font-mono text-[10px] text-[#00D4FF] font-semibold">
                     {item.count}
                   </span>
                 </button>
@@ -532,13 +517,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Quick Search Trigger Bar */}
-          <div className="p-3.5 rounded-2xl border border-white/[0.05] bg-[#0D1117] flex items-center justify-between text-xs">
-            <span className="text-[#94A3B8] flex items-center gap-1.5">
-              <Search className="w-3.5 h-3.5 text-[#CCFF00]" /> Click any keyword above to trigger natural language search
+          <div className="p-3.5 rounded-xl border border-[#30363D] bg-[#171A1D] flex items-center justify-between text-xs">
+            <span className="text-[#A7B0BA] flex items-center gap-1.5">
+              <Search className="w-3.5 h-3.5 text-[#00D4FF]" /> Click any keyword above to run instant search
             </span>
             <button
               onClick={() => onNavigate("search")}
-              className="font-bold text-[#CCFF00] hover:underline flex items-center gap-1 cursor-pointer"
+              className="font-semibold text-[#00D4FF] hover:underline flex items-center gap-1 cursor-pointer"
             >
               <span>Search Hub</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -549,9 +534,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Transparent Usage Dashboard Card */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.25 }}
+        transition={{ duration: 0.25, delay: 0.25 }}
       >
         <YourUsageCard
           screenshots={screenshots}
@@ -562,39 +547,39 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Row 3: Recharts Analytics Section */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.35 }}
-        className="p-6 sm:p-7 rounded-3xl border border-white/[0.08] bg-[#121821] shadow-2xl space-y-6"
+        transition={{ duration: 0.25, delay: 0.35 }}
+        className="p-6 sm:p-7 rounded-2xl border border-[#30363D] bg-[#1E2226] space-y-6"
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.05] pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#30363D] pb-4">
           <div>
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#CCFF00]" />
-              <h3 className="font-extrabold text-lg text-[#F8FAFC]">Visual Analytics & Category Intelligence</h3>
+              <BarChart3 className="w-5 h-5 text-[#00D4FF]" />
+              <h3 className="font-bold text-lg text-[#F5F7FA]">Visual Analytics & Category Intelligence</h3>
             </div>
-            <p className="text-xs text-[#94A3B8] mt-0.5">
+            <p className="text-xs text-[#A7B0BA] mt-0.5">
               Distribution of screenshots across AI categories & 7-day indexing intake trends
             </p>
           </div>
 
-          <div className="flex items-center gap-2 bg-[#0D1117] p-1 rounded-2xl border border-white/[0.08]">
+          <div className="flex items-center gap-2 bg-[#171A1D] p-1 rounded-xl border border-[#30363D]">
             <button
               onClick={() => setChartMetric("count")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 chartMetric === "count"
-                  ? "bg-[#CCFF00] text-[#07090D] shadow-[0_0_12px_rgba(204,255,0,0.3)]"
-                  : "text-[#94A3B8] hover:text-white"
+                  ? "bg-[#00D4FF] text-[#101214]"
+                  : "text-[#A7B0BA] hover:text-[#F5F7FA]"
               }`}
             >
               Category Distribution
             </button>
             <button
               onClick={() => setChartMetric("entities")}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 chartMetric === "entities"
-                  ? "bg-[#CCFF00] text-[#07090D] shadow-[0_0_12px_rgba(204,255,0,0.3)]"
-                  : "text-[#94A3B8] hover:text-white"
+                  ? "bg-[#00D4FF] text-[#101214]"
+                  : "text-[#A7B0BA] hover:text-[#F5F7FA]"
               }`}
             >
               7-Day Intake Trend
@@ -615,29 +600,29 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     </linearGradient>
                   ))}
                 </defs>
-                <XAxis dataKey="label" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                <XAxis dataKey="label" stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="p-3 bg-[#0D1117] border border-white/[0.08] rounded-2xl shadow-xl text-xs space-y-1">
-                          <p className="font-bold text-white flex items-center gap-2">
+                        <div className="p-3 bg-[#171A1D] border border-[#30363D] rounded-xl text-xs space-y-1 shadow-lg">
+                          <p className="font-semibold text-white flex items-center gap-2">
                             <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: data.fill }} />
                             {data.label}
                           </p>
-                          <p className="text-slate-300 font-mono">
-                            Screenshots: <span className="font-bold text-[#CCFF00]">{data.count}</span>
+                          <p className="text-[#A7B0BA] font-mono">
+                            Screenshots: <span className="font-bold text-[#00D4FF]">{data.count}</span>
                           </p>
-                          <p className="text-[#94A3B8] font-mono text-[11px]">% of Vault: {data.percent}%</p>
+                          <p className="text-[#A7B0BA] font-mono text-[11px]">% of Vault: {data.percent}%</p>
                         </div>
                       );
                     }
                     return null;
                   }}
                 />
-                <Bar dataKey="count" radius={[12, 12, 0, 0]}>
+                <Bar dataKey="count" radius={[8, 8, 0, 0]}>
                   {categoryStats.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={`url(#color-${index})`} />
                   ))}
@@ -649,28 +634,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <AreaChart data={activityData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#CCFF00" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="#CCFF00" stopOpacity={0.05} />
+                    <stop offset="5%" stopColor="#00D4FF" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#00D4FF" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
-                <XAxis dataKey="day" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                <XAxis dataKey="day" stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
-                        <div className="p-3 bg-[#0D1117] border border-white/[0.08] rounded-2xl shadow-xl text-xs space-y-1">
-                          <p className="font-bold text-white">{data.day}</p>
-                          <p className="text-[#CCFF00] font-mono font-bold">Indexed: {data.indexed} screenshot(s)</p>
-                          <p className="text-[#00FF66] font-mono text-[11px]">OCR Accuracy: {data.accuracy}%</p>
+                        <div className="p-3 bg-[#171A1D] border border-[#30363D] rounded-xl text-xs space-y-1 shadow-lg">
+                          <p className="font-semibold text-white">{data.day}</p>
+                          <p className="text-[#00D4FF] font-mono font-bold">Indexed: {data.indexed} screenshot(s)</p>
+                          <p className="text-[#22C55E] font-mono text-[11px]">OCR Accuracy: {data.accuracy}%</p>
                         </div>
                       );
                     }
                     return null;
                   }}
                 />
-                <Area type="monotone" dataKey="indexed" stroke="#CCFF00" strokeWidth={3} fillOpacity={1} fill="url(#areaGradient)" />
+                <Area type="monotone" dataKey="indexed" stroke="#00D4FF" strokeWidth={2} fillOpacity={1} fill="url(#areaGradient)" />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -679,22 +664,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Row 4: Categories Breakdown & Facets Grid */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.4 }}
-        className="p-6 sm:p-7 rounded-3xl border border-white/[0.08] bg-[#121821] shadow-2xl space-y-5"
+        transition={{ duration: 0.25, delay: 0.4 }}
+        className="p-6 sm:p-7 rounded-2xl border border-[#30363D] bg-[#1E2226] space-y-5"
       >
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-extrabold text-base text-[#F8FAFC] flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-[#CCFF00]" />
+            <h3 className="font-bold text-base text-[#F5F7FA] flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-[#00D4FF]" />
               <span>Category Facets Index</span>
             </h3>
-            <p className="text-xs text-[#94A3B8]">Structured categorizations automatically labeled by Gemini Vision</p>
+            <p className="text-xs text-[#A7B0BA]">Structured categorizations automatically labeled by Gemini Vision</p>
           </div>
           <button
             onClick={() => onNavigate("gallery")}
-            className="text-xs font-bold text-[#CCFF00] flex items-center gap-1 hover:underline cursor-pointer"
+            className="text-xs font-semibold text-[#00D4FF] flex items-center gap-1 hover:underline cursor-pointer"
           >
             <span>Explore All</span>
             <ArrowRight className="w-4 h-4" />
@@ -709,20 +694,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 onSelectCategory(cat.name);
                 onNavigate("gallery");
               }}
-              className="p-4 rounded-2xl border border-white/[0.08] bg-[#0D1117] hover:border-[#CCFF00]/40 hover:bg-[#182230] flex items-center justify-between cursor-pointer transition-all duration-200 hover:-translate-y-0.5 group"
+              className="p-4 rounded-xl border border-[#30363D] bg-[#171A1D] hover:border-[#00D4FF] hover:bg-[#262C32] flex items-center justify-between cursor-pointer transition-colors group"
             >
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-white/[0.05] group-hover:bg-[#CCFF00]/10 transition-colors">
-                  <cat.icon className={`w-4 h-4 ${cat.color}`} />
+                <div className="p-2 rounded-lg bg-[#1E2226] group-hover:bg-[#1E2226] text-[#00D4FF]">
+                  <cat.icon className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-bold text-xs sm:text-sm text-slate-100 group-hover:text-[#CCFF00] transition-colors">
+                  <div className="font-semibold text-xs sm:text-sm text-[#F5F7FA] group-hover:text-[#00D4FF] transition-colors">
                     {cat.label}
                   </div>
-                  <div className="text-[10px] text-[#64748B] font-mono">{cat.percent}% of vault</div>
+                  <div className="text-[10px] text-[#A7B0BA] font-mono">{cat.percent}% of vault</div>
                 </div>
               </div>
-              <span className="font-mono font-black text-sm text-[#CCFF00] bg-[#CCFF00]/10 px-2.5 py-1 rounded-xl border border-[#CCFF00]/20">
+              <span className="font-mono font-bold text-xs text-[#00D4FF] bg-[#1E2226] px-2.5 py-1 rounded-lg border border-[#30363D]">
                 {cat.count}
               </span>
             </div>
@@ -730,59 +715,58 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </motion.div>
 
-      {/* Row 5: Recent Indexing Timeline Feed */}
+      {/* Row 5: Recent Indexing Stream */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.45 }}
+        transition={{ duration: 0.25, delay: 0.45 }}
         className="space-y-5"
       >
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-[#00FF66]" />
-              <h3 className="text-xl font-extrabold tracking-tight text-[#F8FAFC]">Recent Indexing Stream</h3>
+              <Sparkles className="w-5 h-5 text-[#00D4FF]" />
+              <h3 className="text-xl font-bold tracking-tight text-[#F5F7FA]">Recent Indexing Stream</h3>
             </div>
-            <p className="text-xs text-[#94A3B8] mt-0.5">
-              Latest screenshot uploads with live OCR extraction, key facts, and thumbnail previews
+            <p className="text-xs text-[#A7B0BA] mt-0.5">
+              Latest screenshot uploads with OCR extraction, facts, and previews
             </p>
           </div>
           <button
             onClick={() => onNavigate("gallery")}
-            className="text-xs font-bold text-[#CCFF00] flex items-center gap-1.5 hover:underline cursor-pointer"
+            className="text-xs font-semibold text-[#00D4FF] flex items-center gap-1.5 hover:underline cursor-pointer"
           >
             <span>View All ({totalScreenshots})</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Animated Cards Grid for Recent Indexing */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Recent Indexing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {recentIndexing.map((item, index) => (
             <motion.div
               key={item.id}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05, duration: 0.3 }}
+              transition={{ delay: index * 0.04, duration: 0.25 }}
               onClick={() => onSelectScreenshot(item)}
-              className="group p-6 rounded-3xl border border-white/[0.08] bg-[#121821] hover:bg-[#182230] hover:border-[#CCFF00]/40 shadow-2xl shadow-black/80 text-slate-100 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 space-y-4 flex flex-col justify-between"
+              className="group p-5 rounded-2xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] hover:border-[#00D4FF] text-[#F5F7FA] cursor-pointer transition-colors space-y-4 flex flex-col justify-between"
             >
               <div className="space-y-3">
-                {/* Header: Image Thumbnail + Details */}
-                <div className="flex items-start gap-4">
-                  <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] shrink-0 w-16 h-16 bg-[#07090D]">
+                <div className="flex items-start gap-3.5">
+                  <div className="relative overflow-hidden rounded-xl border border-[#30363D] shrink-0 w-16 h-16 bg-[#101214]">
                     <img
                       src={item.imageUrl}
                       alt={item.title}
-                      className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-300"
+                      className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-200"
                     />
                   </div>
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center justify-between gap-1">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 truncate">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#171A1D] text-[#00D4FF] border border-[#30363D] truncate">
                         {item.category}
                       </span>
-                      <span className="text-[10px] text-[#64748B] font-medium shrink-0 flex items-center gap-1 font-mono">
+                      <span className="text-[10px] text-[#A7B0BA] font-medium shrink-0 flex items-center gap-1 font-mono">
                         <Calendar className="w-3 h-3" />
                         {new Date(item.createdAt).toLocaleDateString(undefined, {
                           month: "short",
@@ -790,28 +774,28 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         })}
                       </span>
                     </div>
-                    <h4 className="font-bold text-sm sm:text-base truncate group-hover:text-[#CCFF00] transition-colors">
+                    <h4 className="font-semibold text-sm sm:text-base truncate group-hover:text-[#00D4FF] transition-colors">
                       {item.title}
                     </h4>
                   </div>
                 </div>
 
-                {/* AI Summary */}
-                <div className="p-3.5 rounded-2xl border border-white/[0.05] bg-[#0D1117] text-xs leading-relaxed text-slate-300">
-                  <p className="line-clamp-2 font-medium">{item.summary || item.fullText}</p>
+                {/* Summary */}
+                <div className="p-3 rounded-xl border border-[#30363D] bg-[#171A1D] text-xs leading-relaxed text-[#A7B0BA]">
+                  <p className="line-clamp-2">{item.summary || item.fullText}</p>
                 </div>
 
-                {/* Extracted Key Facts */}
+                {/* Facts */}
                 {item.keyEntities && item.keyEntities.length > 0 && (
                   <div className="space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] flex items-center gap-1">
-                      <Hash className="w-3 h-3 text-[#00FF66]" /> Extracted Facts
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#A7B0BA] flex items-center gap-1">
+                      <Hash className="w-3 h-3 text-[#00D4FF]" /> Extracted Facts
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {item.keyEntities.slice(0, 3).map((entity, i) => (
                         <span
                           key={i}
-                          className="text-xs px-2.5 py-1 rounded-xl border border-white/[0.08] bg-[#0D1117] text-slate-300 font-mono font-medium truncate max-w-[220px]"
+                          className="text-xs px-2 py-0.5 rounded-lg border border-[#30363D] bg-[#171A1D] text-[#F5F7FA] font-mono text-[11px] truncate max-w-[200px]"
                         >
                           {entity}
                         </span>
@@ -822,11 +806,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
 
               {/* Card Footer */}
-              <div className="pt-3 border-t border-white/[0.05] flex items-center justify-between text-xs">
-                <span className="text-[11px] font-semibold text-[#00FF66] flex items-center gap-1">
+              <div className="pt-3 border-t border-[#30363D] flex items-center justify-between text-xs">
+                <span className="text-[11px] font-medium text-[#22C55E] flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" /> Indexed
                 </span>
-                <span className="font-bold text-[#CCFF00] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                <span className="font-semibold text-[#00D4FF] flex items-center gap-1">
                   <span>Inspect</span>
                   <Eye className="w-3.5 h-3.5" />
                 </span>
@@ -836,7 +820,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
       </motion.div>
 
-      {/* Transparent Usage Modal Breakdown */}
+      {/* Usage Modal Breakdown */}
       <UsageModal
         isOpen={isUsageModalOpen}
         onClose={() => setIsUsageModalOpen(false)}

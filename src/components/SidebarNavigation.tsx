@@ -220,22 +220,16 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
         onClick={() => handleNavClick(item.id)}
         className={`group relative flex items-center ${
           collapsedMode ? "justify-center px-0 py-2.5" : "justify-between px-3 py-2"
-        } w-full rounded-xl text-xs font-medium transition-all duration-150 cursor-pointer ${
+        } w-full rounded-xl text-xs font-medium transition-colors duration-150 cursor-pointer ${
           active
-            ? "bg-[#CCFF00]/10 text-[#CCFF00] font-semibold border border-[#CCFF00]/20"
-            : isDark
-            ? "text-[#94A3B8] hover:text-[#F8FAFC] hover:bg-[#182230]"
-            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            ? "bg-[#1E2226] text-[#00D4FF] font-semibold border border-[#30363D]"
+            : "text-[#A7B0BA] hover:text-[#F5F7FA] hover:bg-[#1E2226]"
         }`}
       >
         <div className={`flex items-center ${collapsedMode ? "justify-center" : "gap-3"} min-w-0`}>
           <Icon
             className={`w-4 h-4 shrink-0 transition-colors ${
-              active
-                ? "text-[#CCFF00]"
-                : isDark
-                ? "text-[#94A3B8] group-hover:text-[#F8FAFC]"
-                : "text-slate-500 group-hover:text-slate-800"
+              active ? "text-[#00D4FF]" : "text-[#A7B0BA] group-hover:text-[#F5F7FA]"
             }`}
           />
           {!collapsedMode && <span className="truncate">{item.label}</span>}
@@ -246,30 +240,26 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
           <span
             className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
               item.id === "notifications"
-                ? "bg-[#FF6600]/20 text-[#FF6600] font-bold shadow-[0_0_8px_rgba(255,102,0,0.3)]"
-                : isDark
-                ? "bg-white/[0.06] text-[#94A3B8]"
-                : "bg-slate-200 text-slate-600"
+                ? "bg-[#F59E0B]/15 text-[#F59E0B] font-semibold border border-[#F59E0B]/30"
+                : "bg-[#101214] border border-[#30363D] text-[#A7B0BA]"
             }`}
           >
             {item.count}
           </span>
         )}
 
-        {/* Dot indicator for collapsed mode if there are unread/counts */}
+        {/* Dot indicator for collapsed mode */}
         {collapsedMode && item.count !== undefined && item.count > 0 && (
           <span
             className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${
-              item.id === "notifications"
-                ? "bg-[#FF6600] shadow-[0_0_6px_rgba(255,102,0,0.8)]"
-                : "bg-[#CCFF00]"
+              item.id === "notifications" ? "bg-[#F59E0B]" : "bg-[#00D4FF]"
             }`}
           />
         )}
 
         {/* Left active border indicator */}
         {active && (
-          <span className="absolute left-0 top-1.5 bottom-1.5 w-1 rounded-r-full bg-[#CCFF00] shadow-[0_0_8px_rgba(204,255,0,0.8)]" />
+          <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r bg-[#00D4FF]" />
         )}
       </button>
     );
@@ -282,18 +272,14 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
         id="desktop-sidebar"
         className={`shrink-0 hidden lg:flex flex-col border-r h-screen overflow-hidden p-3 transition-[width] duration-200 select-none z-30 ${
           isCollapsed ? "w-16" : "w-60"
-        } ${
-          isDark
-            ? "bg-[#0D1117] border-white/[0.08] text-[#F8FAFC]"
-            : "bg-slate-50 border-slate-200 text-slate-800"
-        }`}
+        } bg-[#171A1D] border-[#30363D] text-[#F5F7FA]`}
       >
-        {/* Top Header / Logo & Collapse Toggle (Fixed at top) */}
+        {/* Top Header / Logo & Collapse Toggle */}
         <div className="shrink-0 space-y-2 pb-2">
           <div
             className={`flex items-center ${
               isCollapsed ? "justify-center" : "justify-between"
-            } px-1 pb-2 border-b ${isDark ? "border-white/[0.06]" : "border-slate-200/80"}`}
+            } px-1 pb-2 border-b border-[#30363D]`}
           >
             {!isCollapsed && (
               <button
@@ -301,12 +287,12 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
                 onClick={() => handleNavClick("dashboard")}
                 className="flex items-center gap-2 group cursor-pointer text-left"
               >
-                <SnapFindLogo className="w-7 h-7 rounded-lg object-contain border border-white/[0.08] bg-[#07090D]" />
+                <SnapFindLogo className="w-7 h-7 rounded-lg object-contain border border-[#30363D] bg-[#101214]" />
                 <div className="flex items-center">
-                  <span className="font-extrabold text-sm tracking-tight text-white">
-                    Snap<span className="bg-gradient-to-r from-[#CCFF00] to-[#00FF66] bg-clip-text text-transparent">Find</span>
+                  <span className="font-bold text-sm tracking-tight text-[#F5F7FA]">
+                    Snap<span className="text-[#00D4FF]">Find</span>
                   </span>
-                  <span className="px-1.5 py-0.2 rounded text-[8px] font-black uppercase tracking-wider bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20 ml-1.5">
+                  <span className="px-1.5 py-0.2 rounded text-[8px] font-bold uppercase tracking-wider bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/25 ml-1.5">
                     AI
                   </span>
                 </div>
@@ -318,9 +304,7 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
               type="button"
               onClick={toggleCollapse}
               title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              className={`p-1.5 rounded-lg text-[#94A3B8] hover:text-white transition-colors cursor-pointer ${
-                isDark ? "hover:bg-white/5" : "hover:bg-slate-200"
-              }`}
+              className="p-1.5 rounded-lg text-[#A7B0BA] hover:text-[#F5F7FA] hover:bg-[#1E2226] transition-colors cursor-pointer"
             >
               {isCollapsed ? (
                 <PanelLeft className="w-4 h-4" />
@@ -336,7 +320,7 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
           {/* Top Primary Navigation Group */}
           <div className="space-y-1">
             {!isCollapsed && (
-              <div className="px-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-[#64748B]">
+              <div className="px-3 pb-1 text-[10px] font-semibold tracking-wider uppercase text-[#6B7280]">
                 Navigation
               </div>
             )}
@@ -344,9 +328,9 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
           </div>
 
           {/* Main Business Section (Plans & Pricing) */}
-          <div className={`pt-2 border-t ${isDark ? "border-white/[0.06]" : "border-slate-200/80"}`}>
+          <div className="pt-2 border-t border-[#30363D]">
             {!isCollapsed && (
-              <div className="px-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-[#64748B]">
+              <div className="px-3 pb-1 text-[10px] font-semibold tracking-wider uppercase text-[#6B7280]">
                 Plans &amp; Pricing
               </div>
             )}
@@ -357,10 +341,10 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Bottom Navigation Section (Notifications, Settings, Account) */}
-        <div className={`shrink-0 pt-2 border-t ${isDark ? "border-white/[0.06]" : "border-slate-200/80"}`}>
+        {/* Bottom Navigation Section */}
+        <div className="shrink-0 pt-2 border-t border-[#30363D]">
           {!isCollapsed && (
-            <div className="px-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-[#64748B]">
+            <div className="px-3 pb-1 text-[10px] font-semibold tracking-wider uppercase text-[#6B7280]">
               System
             </div>
           )}
@@ -390,17 +374,15 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
-              className={`relative w-72 max-w-[85vw] h-full flex flex-col justify-between p-4 shadow-2xl overflow-y-auto select-none ${
-                isDark ? "bg-[#0D1117] text-[#F8FAFC] border-r border-white/[0.08]" : "bg-white text-slate-800 border-r border-slate-200"
-              }`}
+              className="relative w-72 max-w-[85vw] h-full flex flex-col justify-between p-4 shadow-2xl overflow-y-auto select-none bg-[#171A1D] text-[#F5F7FA] border-r border-[#30363D]"
             >
               <div className="space-y-5">
                 {/* Header with Logo & Close Button */}
-                <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+                <div className="flex items-center justify-between pb-3 border-b border-[#30363D]">
                   <div className="flex items-center gap-2.5">
-                    <SnapFindLogo className="w-7 h-7 rounded-xl object-contain border border-white/[0.08] bg-[#07090D]" />
-                    <span className="font-extrabold text-base tracking-tight text-white">
-                      Snap<span className="bg-gradient-to-r from-[#CCFF00] to-[#00FF66] bg-clip-text text-transparent">Find</span>
+                    <SnapFindLogo className="w-7 h-7 rounded-xl object-contain border border-[#30363D] bg-[#101214]" />
+                    <span className="font-bold text-base tracking-tight text-[#F5F7FA]">
+                      Snap<span className="text-[#00D4FF]">Find</span>
                     </span>
                   </div>
 
@@ -408,7 +390,7 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
                     id="mobile-drawer-close-btn"
                     type="button"
                     onClick={onCloseMobile}
-                    className="p-1.5 rounded-xl text-[#94A3B8] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-xl text-[#A7B0BA] hover:text-[#F5F7FA] hover:bg-[#1E2226] transition-colors cursor-pointer"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -416,23 +398,23 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
 
                 {/* Primary Navigation */}
                 <div className="space-y-1">
-                  <div className="px-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-[#64748B]">
+                  <div className="px-3 pb-1 text-[10px] font-semibold tracking-wider uppercase text-[#6B7280]">
                     Main Navigation
                   </div>
                   {topNavItems.map((item) => renderNavButton(item, false))}
                 </div>
 
                 {/* Business Section */}
-                <div className="pt-2 border-t border-white/[0.08] space-y-1">
-                  <div className="px-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-[#64748B]">
+                <div className="pt-2 border-t border-[#30363D] space-y-1">
+                  <div className="px-3 pb-1 text-[10px] font-semibold tracking-wider uppercase text-[#6B7280]">
                     Plans &amp; Pricing
                   </div>
                   {businessItems.map((item) => renderNavButton(item, false))}
                 </div>
 
                 {/* Bottom Navigation */}
-                <div className="pt-2 border-t border-white/[0.08] space-y-1">
-                  <div className="px-3 pb-1 text-[10px] font-bold tracking-wider uppercase text-[#64748B]">
+                <div className="pt-2 border-t border-[#30363D] space-y-1">
+                  <div className="px-3 pb-1 text-[10px] font-semibold tracking-wider uppercase text-[#6B7280]">
                     System & Account
                   </div>
                   {bottomItems.map((item) => renderNavButton(item, false))}
@@ -441,15 +423,15 @@ export const SidebarNavigation: React.FC<SidebarProps> = ({
 
               {/* User summary at bottom of drawer */}
               {user && (
-                <div className="pt-4 mt-6 border-t border-white/[0.08] flex items-center justify-between text-xs">
+                <div className="pt-4 mt-6 border-t border-[#30363D] flex items-center justify-between text-xs">
                   <div className="flex items-center gap-2 truncate">
-                    <div className="w-6 h-6 rounded-full bg-[#CCFF00]/20 text-[#CCFF00] flex items-center justify-center font-bold text-[10px]">
+                    <div className="w-6 h-6 rounded-full bg-[#00D4FF]/20 text-[#00D4FF] flex items-center justify-center font-bold text-[10px]">
                       {user.name ? user.name[0].toUpperCase() : "U"}
                     </div>
-                    <span className="truncate text-slate-300">{user.name || "SnapFind User"}</span>
+                    <span className="truncate text-[#A7B0BA]">{user.name || "User"}</span>
                   </div>
                   {isPro && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00FF66]/15 text-[#00FF66] border border-[#00FF66]/30">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00D4FF]/15 text-[#00D4FF] border border-[#00D4FF]/30">
                       PRO
                     </span>
                   )}

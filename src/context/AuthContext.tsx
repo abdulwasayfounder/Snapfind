@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "../services/supabase";
 import { UserProfile, UserEntitlement } from "../types";
-import { loadUserProfile, saveUserProfile } from "../services/storage.ts";
+import { loadUserProfile, saveUserProfile, clearUserCache } from "../services/storage.ts";
 import { StorageManager } from "../services/storage/StorageManager";
 import { SyncEngine } from "../services/syncEngine";
 import { SubscriptionManager } from "../services/billing/SubscriptionManager";
@@ -19,8 +19,9 @@ interface AuthContextType {
   isRecoveryMode: boolean;
   setIsRecoveryMode: (val: boolean) => void;
   refreshEntitlement: () => Promise<void>;
-  signInWithEmail: (email: string, pass: string) => Promise<{ error?: string }>;
-  signUpWithEmail: (email: string, pass: string, name?: string) => Promise<{ error?: string }>;
+  signInWithEmail: (email: string, pass: string) => Promise<{ error?: string; isUnconfirmedEmail?: boolean }>;
+  signUpWithEmail: (email: string, pass: string, name?: string) => Promise<{ error?: string; requiresVerification?: boolean; message?: string }>;
+  resendVerificationEmail: (email: string) => Promise<{ error?: string; success?: boolean }>;
   signInWithGoogle: () => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
   signOutAllDevices: () => Promise<{ error?: string }>;
@@ -229,8 +230,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     saveUserProfile(updatedProfile);
   };
 
-  const signInWithEmail = async (email: string, pass: string) => {
+  const signInWithEmail = async (
+    email: string,
+    pass: string
+  ): Promise<{ error?: string; isUnconfirmedEmail?: boolean }> => {
     const cleanEmail = email.trim();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return { error: "Please enter a valid email address." };
+    }
+    if (!pass) {
+      return { error: "Please enter your account password." };
+    }
+
     if (!isSupabaseConfigured) {
       // Demo authentication simulation with server-authoritative entitlement
       const localId = `user_${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`;
@@ -241,7 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: cleanEmail,
         isLoggedIn: true,
         plan: currentEnt.tier,
-        storageLimitMB: (currentEnt.isPro || currentEnt.isFounder) ? 10000 : 500,
+        storageLimitMB: currentEnt.isPro || currentEnt.isFounder ? 10000 : 500,
         createdAt: new Date().toISOString(),
         provider: "email",
         entitlement: currentEnt,
@@ -259,7 +270,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (error) {
       console.error("[AuthContext] signInWithPassword error:", error.message);
-      return { error: error.message };
+      const isUnconfirmed = error.message.toLowerCase().includes("email not confirmed");
+      return {
+        error: isUnconfirmed
+          ? "Your email address has not been confirmed yet. Please verify your email with the confirmation link sent to your inbox."
+          : error.message,
+        isUnconfirmedEmail: isUnconfirmed,
+      };
     }
     if (data?.session?.user) {
       syncProfile(data.session.user);
@@ -269,8 +286,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return {};
   };
 
-  const signUpWithEmail = async (email: string, pass: string, name?: string) => {
+  const signUpWithEmail = async (
+    email: string,
+    pass: string,
+    name?: string
+  ): Promise<{ error?: string; requiresVerification?: boolean; message?: string }> => {
     const cleanEmail = email.trim();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return { error: "Please enter a valid email address." };
+    }
+    if (!pass || pass.length < 6) {
+      return { error: "Password must be at least 6 characters long." };
+    }
+
     if (!isSupabaseConfigured) {
       const localId = `user_${cleanEmail.replace(/[^a-zA-Z0-9]/g, "_")}`;
       const currentEnt = await SubscriptionManager.syncEntitlementsFromServer(localId);
@@ -280,7 +308,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: cleanEmail,
         isLoggedIn: true,
         plan: currentEnt.tier,
-        storageLimitMB: (currentEnt.isPro || currentEnt.isFounder) ? 10000 : 500,
+        storageLimitMB: currentEnt.isPro || currentEnt.isFounder ? 10000 : 500,
         createdAt: new Date().toISOString(),
         provider: "email",
         entitlement: currentEnt,
@@ -288,7 +316,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(mockUser);
       saveUserProfile(mockUser);
       SyncEngine.setCurrentUserId(mockUser.id);
-      return {};
+      return { message: "Account created and logged in." };
     }
 
     const { data, error } = await supabase.auth.signUp({
@@ -298,22 +326,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         data: {
           full_name: name || cleanEmail.split("@")[0],
         },
+        emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : "https://snapfind.ai.studio/",
       },
     });
     if (error) return { error: error.message };
 
     if (data?.user && !data?.session) {
       return {
-        error: "Registration successful! Please check your email to confirm your account before logging in.",
+        requiresVerification: true,
+        message: "Registration successful! A verification link has been sent to your email. Please check your inbox and verify your email before logging in.",
       };
     }
 
     if (data?.session?.user) {
       syncProfile(data.session.user);
       SyncEngine.setCurrentUserId(data.session.user.id);
+      NotificationService.notifyNewLogin({ email: cleanEmail, platform: "Email / Web" });
     }
 
-    return {};
+    return { message: "Account created successfully." };
+  };
+
+  const resendVerificationEmail = async (
+    email: string
+  ): Promise<{ error?: string; success?: boolean }> => {
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      return { error: "Please enter a valid email address to resend confirmation." };
+    }
+    if (!isSupabaseConfigured) {
+      return { success: true };
+    }
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: cleanEmail,
+      options: {
+        emailRedirectTo: typeof window !== "undefined" ? `${window.location.origin}/` : "https://snapfind.ai.studio/",
+      },
+    });
+    if (error) return { error: error.message };
+    return { success: true };
   };
 
   const signInWithGoogle = async (): Promise<{ error?: string }> => {
@@ -375,14 +427,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut().catch((err) => console.warn("[AuthContext] signOut error:", err));
     }
     SubscriptionManager.resetToFree();
     SyncEngine.setCurrentUserId("guest");
-    const current = loadUserProfile();
-    const loggedOutUser = { ...current, isLoggedIn: false };
-    setUser(loggedOutUser);
-    saveUserProfile(loggedOutUser);
+    clearUserCache();
+    const guestUser: UserProfile = {
+      id: "guest",
+      name: "Sign In",
+      email: "",
+      avatarUrl: "",
+      isLoggedIn: false,
+      plan: "Free",
+      storageLimitMB: 500,
+    };
+    setUser(guestUser);
+    saveUserProfile(guestUser);
   };
 
   const signOutAllDevices = async (): Promise<{ error?: string }> => {
@@ -396,10 +456,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       SubscriptionManager.resetToFree();
       SyncEngine.setCurrentUserId("guest");
-      const current = loadUserProfile();
-      const loggedOutUser = { ...current, isLoggedIn: false };
-      setUser(loggedOutUser);
-      saveUserProfile(loggedOutUser);
+      clearUserCache();
+      const guestUser: UserProfile = {
+        id: "guest",
+        name: "Sign In",
+        email: "",
+        avatarUrl: "",
+        isLoggedIn: false,
+        plan: "Free",
+        storageLimitMB: 500,
+      };
+      setUser(guestUser);
+      saveUserProfile(guestUser);
       return {};
     } catch (err: any) {
       return { error: err?.message || "Failed to sign out from all devices" };
@@ -639,6 +707,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         refreshEntitlement,
         signInWithEmail,
         signUpWithEmail,
+        resendVerificationEmail,
         signInWithGoogle,
         signOut,
         signOutAllDevices,

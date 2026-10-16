@@ -314,6 +314,13 @@ export async function initializeStorage(): Promise<void> {
   }
 }
 
+export function clearUserCache(): void {
+  cachedScreenshots = null;
+  cachedSettings = null;
+  cachedSearchHistory = null;
+  cachedUserProfile = null;
+}
+
 export function loadStoredScreenshots(): ScreenshotItem[] {
   if (cachedScreenshots) return cachedScreenshots;
   

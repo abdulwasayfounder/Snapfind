@@ -1,24 +1,17 @@
 import React from "react";
-import { SnapFindLogo } from "./SnapFindLogo";
-import { Ai3dCanvas } from "./Ai3dCanvas";
 import {
-  Sparkles,
   Search,
   ArrowRight,
-  Heart,
-  Camera,
-  Utensils,
-  Plane,
-  Receipt,
-  MessageSquare,
   ShieldCheck,
   Zap,
-  Bookmark,
-  QrCode,
-  CreditCard,
+  Lock,
+  Layers,
   FileText,
+  Utensils,
+  CreditCard,
+  Plane,
 } from "lucide-react";
-import { motion } from "motion/react";
+import { Ai3dCanvas } from "./Ai3dCanvas";
 
 interface LandingScreenProps {
   onGetStarted: () => void;
@@ -30,89 +23,61 @@ interface LandingScreenProps {
 export const LandingScreen: React.FC<LandingScreenProps> = ({
   onGetStarted,
   onTrySearch,
-  isDark,
-  totalIndexed,
 }) => {
   return (
-    <div className="space-y-12 py-4">
+    <div className="space-y-10 py-2">
       {/* Hero Section */}
-      <div
-        className={`relative overflow-hidden rounded-3xl border p-8 sm:p-14 text-center shadow-2xl transition-all duration-300 ${
-          isDark
-            ? "bg-gradient-to-b from-blue-950/50 via-slate-900 to-slate-950 border-slate-800"
-            : "bg-gradient-to-b from-blue-50/80 via-indigo-50/40 to-white border-slate-200"
-        }`}
-      >
-        {/* Glow Effects */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-blue-500/15 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-10 w-80 h-80 bg-purple-500/10 rounded-full blur-[90px] pointer-events-none" />
-
-        <div className="relative max-w-3xl mx-auto space-y-8">
-          {/* Big App Name & Logo Badge */}
-          <div className="flex flex-col items-center justify-center gap-4">
-            <h1 className="text-4xl sm:text-6xl font-black tracking-wider bg-gradient-to-r from-blue-400 via-indigo-200 to-cyan-300 bg-clip-text text-transparent uppercase drop-shadow-lg">
-              <span className="sr-only">SnapFind AI – AI Screenshot Search: </span>
-              SNAP FIND
-            </h1>
-
-            {/* Interactive 3D AI Neural Animation */}
-            <div className="w-full max-w-lg my-2">
-              <Ai3dCanvas height="h-64 sm:h-72" />
-            </div>
-
-            <div
-              className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-md ${
-                isDark
-                  ? "bg-blue-500/10 border-blue-500/30 text-blue-300"
-                  : "bg-blue-100/80 border-blue-200 text-blue-700 shadow-sm"
-              }`}
-            >
-              <Heart className="w-3.5 h-3.5 text-rose-400 fill-rose-400 animate-pulse" />
-              <span>Never lose a screenshot again</span>
-            </div>
+      <div className="relative rounded-2xl border border-[#30363D] bg-[#171A1D] p-8 sm:p-12 text-center transition-all select-none">
+        <div className="relative max-w-3xl mx-auto space-y-6">
+          {/* Eyebrow badge */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium border border-[#30363D] bg-[#1E2226] text-[#A7B0BA]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF]" />
+            <span>AI-Powered Visual Memory &amp; Search Engine</span>
           </div>
 
-          {/* Main Emotional Headline */}
-          <h2 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-100 leading-[1.15]">
+          {/* Main Headline */}
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-[#F5F7FA] leading-tight">
             Stop Scrolling. <br />
-            <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-300 bg-clip-text text-transparent">
-              Find Any Screenshot in Seconds.
-            </span>
-          </h2>
+            <span className="text-[#00D4FF]">Find Any Screenshot in Seconds.</span>
+          </h1>
 
-          {/* Emotional Subheadline */}
-          <p className="text-sm sm:text-lg text-slate-300/90 max-w-2xl mx-auto leading-relaxed font-normal">
-            We snap screenshots to save important things—a family recipe, a ticket, a Wi-Fi password, or a quick idea. SnapFind reads the words inside your photos so you can locate anything instantly without endless scrolling.
+          {/* Neural Canvas visual */}
+          <div className="w-full max-w-md mx-auto my-1">
+            <Ai3dCanvas height="h-56 sm:h-64" />
+          </div>
+
+          {/* Subheadline */}
+          <p className="text-sm sm:text-base text-[#A7B0BA] max-w-2xl mx-auto leading-relaxed">
+            SnapFind indexes the words, dates, prices, and objects inside your saved screenshots.
+            Search naturally like talking to a human, and retrieve what you need instantly.
           </p>
 
           {/* Primary CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
             <button
               onClick={onGetStarted}
               id="hero-get-started-btn"
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-base shadow-xl shadow-blue-500/25 active:scale-95 transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              type="button"
+              className="w-full sm:w-auto px-7 py-3 rounded-xl bg-[#00D4FF] hover:bg-[#00B8D9] text-[#101214] font-semibold text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>Get Started</span>
-              <ArrowRight className="w-5 h-5" />
+              <span>Open Dashboard</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               onClick={() => onTrySearch("Show the passport screenshot I saved last week")}
-              className={`w-full sm:w-auto px-6 py-4 rounded-2xl border font-semibold text-sm transition-all flex items-center justify-center gap-2 backdrop-blur-md cursor-pointer ${
-                isDark
-                  ? "border-slate-700 bg-slate-900/90 text-slate-200 hover:border-blue-500/50 hover:bg-slate-800"
-                  : "border-slate-300 bg-white text-slate-800 hover:border-blue-400 shadow-sm"
-              }`}
+              type="button"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl border border-[#30363D] bg-[#1E2226] hover:bg-[#262C32] text-[#F5F7FA] font-medium text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Search className="w-4 h-4 text-blue-400" />
-              <span>Try Demo: "Show the passport screenshot I saved last week"</span>
+              <Search className="w-3.5 h-3.5 text-[#00D4FF]" />
+              <span>Try Demo: "Show passport screenshot"</span>
             </button>
           </div>
 
-          {/* Quick Natural Queries Cloud */}
-          <div className="pt-6 border-t border-slate-800/60">
-            <p className="text-xs font-semibold text-slate-400 mb-3">
-              Tap a quick search example:
+          {/* Quick Natural Queries */}
+          <div className="pt-6 border-t border-[#30363D]">
+            <p className="text-xs font-medium text-[#A7B0BA] mb-3">
+              Popular natural language queries:
             </p>
             <div className="flex flex-wrap items-center justify-center gap-2">
               {[
@@ -123,14 +88,11 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
               ].map(({ label, icon: Icon }) => (
                 <button
                   key={label}
+                  type="button"
                   onClick={() => onTrySearch(label)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
-                    isDark
-                      ? "bg-slate-900/90 border-slate-800 text-slate-300 hover:border-blue-500/50 hover:text-white hover:bg-slate-800"
-                      : "bg-white border-slate-200 text-slate-700 hover:border-blue-400 hover:bg-blue-50/50"
-                  }`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#30363D] bg-[#1E2226] text-[#A7B0BA] hover:text-[#F5F7FA] hover:border-[#00D4FF] text-xs transition-colors cursor-pointer"
                 >
-                  <Icon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  <Icon className="w-3.5 h-3.5 text-[#00D4FF] shrink-0" />
                   <span>"{label}"</span>
                 </button>
               ))}
@@ -139,65 +101,55 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({
         </div>
       </div>
 
-      {/* Relatable / Emotional Story Cards */}
+      {/* Relatable Category Highlights */}
       <div className="space-y-4">
         <div className="text-center max-w-xl mx-auto space-y-1">
-          <h2 className="text-xl font-bold tracking-tight">Your Camera Roll, Reimagined</h2>
-          <p className="text-xs text-slate-400">
-            Designed for real everyday moments when you need information right now.
+          <h2 className="text-lg font-bold tracking-tight text-[#F5F7FA]">
+            Intelligent Visual Memory
+          </h2>
+          <p className="text-xs text-[#A7B0BA]">
+            Your screenshots automatically categorized, parsed, and protected locally.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1: Bills & Receipts */}
-          <div
-            className={`p-6 rounded-3xl border space-y-3 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-              isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200/90"
-            }`}
-          >
-            <div className="text-3xl">📄</div>
-            <h3 className="font-bold text-base text-slate-100">Bills & Receipts</h3>
-            <p className="text-xs text-slate-300/90 leading-relaxed font-medium">
-              Never lose an important payment receipt again.
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-xl border border-[#30363D] bg-[#1E2226] space-y-2 hover:border-[#00D4FF] transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-[#171A1D] border border-[#30363D] flex items-center justify-center text-[#00D4FF]">
+              <CreditCard className="w-4 h-4" />
+            </div>
+            <h3 className="font-semibold text-sm text-[#F5F7FA]">Bills &amp; Invoices</h3>
+            <p className="text-xs text-[#A7B0BA] leading-normal">
+              Track due dates, account numbers, and amounts due automatically.
             </p>
           </div>
 
-          {/* Card 2: Travel */}
-          <div
-            className={`p-6 rounded-3xl border space-y-3 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-              isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200/90"
-            }`}
-          >
-            <div className="text-3xl">✈️</div>
-            <h3 className="font-bold text-base text-slate-100">Travel</h3>
-            <p className="text-xs text-slate-300/90 leading-relaxed font-medium">
-              Find boarding passes and hotel bookings instantly.
+          <div className="p-5 rounded-xl border border-[#30363D] bg-[#1E2226] space-y-2 hover:border-[#00D4FF] transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-[#171A1D] border border-[#30363D] flex items-center justify-center text-[#00D4FF]">
+              <Plane className="w-4 h-4" />
+            </div>
+            <h3 className="font-semibold text-sm text-[#F5F7FA]">Travel &amp; Passes</h3>
+            <p className="text-xs text-[#A7B0BA] leading-normal">
+              Locate airline bookings, confirmation codes, and itinerary screenshots.
             </p>
           </div>
 
-          {/* Card 3: Chats */}
-          <div
-            className={`p-6 rounded-3xl border space-y-3 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-              isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200/90"
-            }`}
-          >
-            <div className="text-3xl">💬</div>
-            <h3 className="font-bold text-base text-slate-100">Chats</h3>
-            <p className="text-xs text-slate-300/90 leading-relaxed font-medium">
-              Locate important conversations without endless scrolling.
+          <div className="p-5 rounded-xl border border-[#30363D] bg-[#1E2226] space-y-2 hover:border-[#00D4FF] transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-[#171A1D] border border-[#30363D] flex items-center justify-center text-[#00D4FF]">
+              <Lock className="w-4 h-4" />
+            </div>
+            <h3 className="font-semibold text-sm text-[#F5F7FA]">Private Vault</h3>
+            <p className="text-xs text-[#A7B0BA] leading-normal">
+              Sensitive screenshots are blurred and protected behind PIN or biometrics.
             </p>
           </div>
 
-          {/* Card 4: Recipes */}
-          <div
-            className={`p-6 rounded-3xl border space-y-3 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 ${
-              isDark ? "bg-slate-900/80 border-slate-800" : "bg-white border-slate-200/90"
-            }`}
-          >
-            <div className="text-3xl">🍽️</div>
-            <h3 className="font-bold text-base text-slate-100">Recipes</h3>
-            <p className="text-xs text-slate-300/90 leading-relaxed font-medium">
-              Search for any recipe you saved—even months later.
+          <div className="p-5 rounded-xl border border-[#30363D] bg-[#1E2226] space-y-2 hover:border-[#00D4FF] transition-colors">
+            <div className="w-9 h-9 rounded-lg bg-[#171A1D] border border-[#30363D] flex items-center justify-center text-[#00D4FF]">
+              <Zap className="w-4 h-4" />
+            </div>
+            <h3 className="font-semibold text-sm text-[#F5F7FA]">Instant Offline OCR</h3>
+            <p className="text-xs text-[#A7B0BA] leading-normal">
+              Fast local indexing with zero cloud telemetry required.
             </p>
           </div>
         </div>

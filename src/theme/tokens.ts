@@ -1,68 +1,66 @@
 /**
- * SnapFind AI - Centralized Design Tokens & Vibrant Premium Color System
+ * SnapFind AI - Centralized Design Tokens & Color System
  *
- * Palette Archetype:
- * - Primary: Electric Violet / Indigo (#6366F1 / #7C3AED / #818CF8)
- * - Secondary: Cyan / Aqua (#06B6D4 / #22D3EE / #00F5FF)
- * - Accent: Magenta / Pink (#EC4899 / #F43F5E)
- * - Success / Indexed: Emerald (#10B981 / #00FF66)
- * - Warning / Attention: Amber (#F59E0B / #FFB800)
- * - Danger / Error: Vibrant Red (#EF4444 / #FF0000)
- * - Dark Canvas: Obsidian Charcoal (#07090E)
- * - Dark Surface: Graphite (#0D111A)
- * - Elevated Surface: Deep Slate (#131924)
- * - Primary Text: Crisp White (#F8FAFC)
- * - Secondary Text: Cool Slate (#94A3B8)
- * - Muted Text: Deep Slate (#64748B)
- * - Border: rgba(255, 255, 255, 0.08)
+ * Design Direction: Premium Graphite + Electric Cyan
+ * - Main background: #101214
+ * - Sidebar: #171A1D
+ * - Cards and elevated surfaces: #1E2226
+ * - Borders: #30363D
+ * - Primary accent: #00D4FF
+ * - Hover accent: #00B8D9
+ * - Primary text: #F5F7FA
+ * - Secondary text: #A7B0BA
+ * - Success: #22C55E
+ * - Warning: #F59E0B
+ * - Error: #EF4444
  */
 
 export const SnapFindTokens = {
   colors: {
-    bg: "#07090E",
-    surface: "#0D111A",
-    surfaceElevated: "#131924",
-    surfaceHover: "#1A2232",
-    border: "rgba(255, 255, 255, 0.08)",
-    borderHover: "rgba(99, 102, 241, 0.4)",
+    bg: "#101214",
+    surface: "#171A1D",
+    surfaceElevated: "#1E2226",
+    surfaceHover: "#262C32",
+    border: "#30363D",
+    borderHover: "#00D4FF",
 
-    // Vibrant Brand Accents
-    primary: "#6366F1", // Electric Violet
-    primaryHover: "#7C3AED",
-    primaryLight: "#818CF8",
-    secondary: "#06B6D4", // Cyan / Aqua
-    secondaryHover: "#22D3EE",
-    accent: "#EC4899", // Magenta / Pink
-    accentHover: "#F43F5E",
-    ai: "#10B981", // Emerald AI
-    aiHover: "#34D399",
-    aiNeon: "#00FF66",
-    attention: "#F59E0B", // Amber
-    highlight: "#FBBF24",
-    danger: "#EF4444", // Red
+    // Primary Electric Cyan Accents
+    primary: "#00D4FF",
+    primaryHover: "#00B8D9",
+    primaryLight: "#33DDFF",
+    secondary: "#00D4FF",
+    secondaryHover: "#00B8D9",
+    accent: "#00D4FF",
+    accentHover: "#00B8D9",
+
+    // Semantic States
+    ai: "#00D4FF",
+    aiHover: "#00B8D9",
+    aiNeon: "#00D4FF",
+    success: "#22C55E",
+    warning: "#F59E0B",
+    attention: "#F59E0B",
+    highlight: "#00D4FF",
+    error: "#EF4444",
+    danger: "#EF4444",
 
     // Typography
-    textPrimary: "#F8FAFC",
-    textSecondary: "#94A3B8",
-    textMuted: "#64748B",
-    textDisabled: "#475569",
+    textPrimary: "#F5F7FA",
+    textSecondary: "#A7B0BA",
+    textMuted: "#6B7280",
+    textDisabled: "#4B5563",
   },
   gradients: {
-    primary: "linear-gradient(135deg, #6366F1 0%, #06B6D4 100%)",
-    ai: "linear-gradient(135deg, #6366F1 0%, #10B981 100%)",
-    aiSubtle: "linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.12) 100%)",
-    magentaCyan: "linear-gradient(135deg, #EC4899 0%, #06B6D4 100%)",
-    speed: "linear-gradient(90deg, #EC4899 0%, #6366F1 50%, #06B6D4 100%)",
-    discovery: "linear-gradient(135deg, #F59E0B 0%, #6366F1 100%)",
-    crown: "linear-gradient(135deg, #FBBF24 0%, #EC4899 100%)",
-    cardGlow: "radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15), transparent 70%)",
+    // Solid & subtle dark surfaces (eliminating cheap purple/pink glows)
+    primary: "linear-gradient(180deg, #1E2226 0%, #171A1D 100%)",
+    ai: "linear-gradient(180deg, #1E2226 0%, #171A1D 100%)",
+    aiSubtle: "linear-gradient(180deg, rgba(0, 212, 255, 0.08) 0%, rgba(0, 212, 255, 0.02) 100%)",
+    cardGlow: "none",
   },
   shadows: {
-    primary: "0 4px 20px -2px rgba(99, 102, 241, 0.35)",
-    secondary: "0 4px 20px -2px rgba(6, 182, 212, 0.35)",
-    ai: "0 4px 20px -2px rgba(16, 185, 129, 0.3)",
-    attention: "0 4px 16px -2px rgba(245, 158, 11, 0.35)",
-    card: "0 8px 32px -8px rgba(0, 0, 0, 0.6)",
+    primary: "0 2px 8px rgba(0, 212, 255, 0.15)",
+    card: "0 4px 12px rgba(0, 0, 0, 0.4)",
+    elevated: "0 8px 24px rgba(0, 0, 0, 0.6)",
   },
 } as const;
 
